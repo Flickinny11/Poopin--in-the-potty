@@ -1,0 +1,163 @@
+2. App Description & Features
+VidLingo is a cross-platform video chat app with real-time, AI-powered language translation and lipsync, designed for iOS, Android, Mac, and Windows.
+Core Features:
+	•	Real-time video chat with instant language translation (speech-to-speech)
+	•	AI lipsync for natural, in-language mouth movement
+	•	Supports 50+ languages
+	•	Auto-detect language and seamless switching
+	•	Group and one-on-one video calls
+	•	Conversation transcript and summary
+	•	End-to-end encryption for privacy
+	•	Minimal latency, HD video quality
+Optional Add-ons:
+	•	AR backgrounds and filters
+	•	Meeting recording with translated subtitles
+	•	Scheduled calls and calendar integration
+3. Design & Style
+	•	Modern, minimalist UI: Clean layouts, large video windows, floating translation bubbles
+	•	Color palette: Soft blues and whites for trust and clarity
+	•	Micro-interactions: Subtle animations for translation events and lipsync transitions
+	•	Accessibility: High-contrast mode, large text options
+4. Monetization Model
+Freemium with Premium Upsell:
+	•	Free Tier: Limited video call minutes per month, basic translation (ad-supported)
+	•	Premium Subscription: $9.99/month for unlimited calls, HD video, advanced translation, group calls, and recording
+	•	Pay-Per-Use: $0.99 for 30-minute translation pass (for travelers or occasional users)
+	•	Enterprise Plan: Custom pricing for businesses (integration, analytics, admin controls)
+Revenue Drivers:
+	•	Premium conversions (target: 5-10% of free users)
+	•	Pay-per-use for non-subscribers
+	•	Enterprise contracts for global teams
+5. Technical Integration
+Since you can code the app and handle video streaming:
+	•	You do NOT need a third-party video call API if you build your own video infrastructure (using WebRTC or similar).
+	•	You DO need a translation/lipsync API: integrate HeyGen for real-time translation and lipsync, or Vozo AI for advanced dubbing if you need asynchronous translation.
+Optional:
+	•	Use Google or Microsoft APIs for fallback/basic translation if cost is an issue, but they do not provide lipsync.
+6. Standalone vs. Integration
+	•	Standalone launch is best for speed and control.
+	•	Future: Offer plugins/integrations for Teams, Zoom, etc., once core user base and product stability are achieved.
+7. VidLingo leverages the latest in AI translation and lipsync to deliver natural, engaging, and barrier-free video conversations—maximizing user engagement, retention, and monetization potential.
+
+API Key Management & Rate Limiting Solution for HeyGen
+1. Key Management & Scaling Approach
+	•	Multiple API Keys: Since you can’t get an enterprise key at launch, register several HeyGen accounts (as allowed by their TOS) and obtain separate API keys for each.
+	•	Backend Key Pool: Store all API keys securely on your backend (never in the client). Use a database or encrypted environment variables.
+	•	Key Rotation Logic: Implement a load balancer in your backend to assign keys per request. Distribute traffic evenly to avoid hitting the per-key rate limit.
+	•	Rate Limit Monitoring: Track usage for each key. If a key approaches its quota, automatically switch to another key in the pool.
+	•	Exponential Backoff & Retry: On 429 (rate limit) errors, use exponential backoff before retrying with another key.
+	•	Token Refresh (OAuth): If using OAuth for user-specific actions, manage access/refresh tokens as described in HeyGen’s docs. For API-key access, rotate keys only.
+	•	Alerting: Set up automated alerts for failed requests or when any key nears its limit.
+
+VidLingo: Full App Description & Build Blueprint
+App Overview
+VidLingo is a cross-platform (iOS, Android, Mac, Windows) video chat app with real-time AI-powered translation and lipsync, enabling seamless multilingual conversations.
+Key Features
+	•	Real-time video chat with instant speech-to-speech translation
+	•	AI lipsync for natural, in-language mouth movement
+	•	50+ languages supported
+	•	Auto language detection and switching
+	•	Group and 1:1 calls
+	•	Conversation transcript & summary
+	•	End-to-end encryption
+	•	AR backgrounds and filters
+	•	Meeting recording (premium)
+	•	Usage dashboard (minutes, languages used)
+	•	Invite/share links
+Pricing Structure
+	•	Free Tier:
+	•	10 minutes/month of translation
+	•	Watermarked video
+	•	Ads between calls
+	•	Premium:
+	•	$9.99/month: Unlimited translation, HD, no watermark, group calls, recording, priority support
+	•	Pay-Per-Use:
+	•	$0.99 for a 30-minute translation pass
+	•	Enterprise:
+	•	Custom pricing for teams (bulk minutes, admin dashboard)
+Conversion Tactics:
+	•	Free trial of premium for 7 days
+	•	In-app reminders when free minutes run out
+	•	Discounts for annual subscriptions
+Design & Style Layout Map
+General Style
+	•	Theme: Modern, global, minimalist
+	•	Colors: Soft blue (#3A8DFF), white, light gray backgrounds, accent gradients
+	•	Typography: Inter/SF Pro/Roboto, 16–20pt body, 24–32pt headers
+	•	Buttons: Rounded (8px), blue for primary, white/blue border for secondary, shadow on hover
+	•	Icons: Line icons, consistent stroke, color-coded by function
+Page-by-Page Layout
+1. Splash/Onboarding
+	•	Centered VidLingo logo, fade-in
+	•	Carousel (What is VidLingo, Features, Privacy)
+	•	Large “Sign Up” (blue) and “Log In” (white, blue border)
+	•	SSO: Apple, Google
+2. Home/Dashboard
+	•	Header: Avatar (left), Settings (right)
+	•	Main:
+	•	“Start a Call” (large blue button)
+	•	“Join a Call” (white, blue border)
+	•	Recent Conversations: List with avatar, name, last message, timestamp
+	•	Quick Actions: “Invite Friends”, “Upgrade to Premium” (badge if free)
+3. Video Call Screen
+	•	Full-screen video, rounded corners
+	•	Translation bubble: Bottom center, color-coded, pops in as text is translated
+	•	Lipsync indicator: Animated icon next to video feed
+	•	Controls (bottom bar):
+	•	Mute/unmute
+	•	Camera on/off
+	•	Language switch (dropdown, flags)
+	•	End call (red)
+	•	Add participant (+)
+	•	Record (premium, lock if not)
+	•	AR Filters: Overlay button (top right)
+4. Settings
+	•	Profile: Avatar, name, email, language preference
+	•	Subscription: Plan, upgrade/downgrade, payment info
+	•	Usage: Minutes used, premium status
+	•	Privacy: Encryption toggle, export data
+	•	Notifications: Call invites, translation events
+	•	Support: FAQ, contact, report bug
+5. Premium Upsell
+	•	Banner: “Upgrade for Unlimited Translation” (animated sparkle)
+	•	Features: Unlimited minutes, HD, no watermark, priority support
+	•	CTA: “Upgrade Now” (large blue)
+6. Conversation History
+	•	List: Avatars, participants, date/time
+	•	Detail: Transcript (original + translated), download/share (premium)
+7. Error Handling
+	•	Modal: “Translation Limit Reached – Upgrade for More Minutes” (CTA, buy pass)
+	•	Fallback: “Translation temporarily unavailable, please try again soon.”
+Buttons & Settings
+	•	Primary: Blue, white text, rounded, shadow
+	•	Secondary: White, blue border, blue text
+	•	Danger: Red, white text (end call)
+	•	Disabled: Gray, no shadow
+Settings Options:
+	•	Language selection (dropdown, searchable)
+	•	Video quality (auto, HD, SD)
+	•	AR filter toggle
+	•	Privacy (show/hide online status)
+	•	Notification preferences
+Tech Stack & Language
+	•	Frontend: Swift (iOS, Mac), Kotlin (Android), React (Web), Electron (Windows/Mac)
+	•	Backend: Node.js or Python (for API key management, user auth, rate limiting)
+	•	Video: WebRTC (native or via open-source libraries)
+	•	Translation/Lipsync: HeyGen API (integrated server-side)
+	•	Database: PostgreSQL or MongoDB (user data, key usage tracking)
+	•	API Key Management: Custom backend service as described above
+API Rate Limiting Management
+	•	Distribute requests across multiple keys
+	•	Monitor and log per-key usage
+	•	Switch keys automatically on quota/rate limit errors
+	•	Use exponential backoff and retry logic for 429/5xx errors
+	•	Alert admins when keys are near exhaustion
+	•	Plan to negotiate higher limits as user base grows
+Other Important Planning Details
+	•	Security: Store all API keys and tokens server-side, use HTTPS everywhere, encrypt sensitive data
+	•	Compliance: Ensure GDPR compliance (data export, deletion)
+	•	Scalability: Design backend to add/remove keys easily; use cloud functions or containerized microservices for scaling
+	•	User Experience: Prioritize low-latency translation, clear error messages, and seamless upgrade flow
+	•	Analytics: Track usage, conversion, retention, and error rates for rapid iteration
+Summary:
+Build a backend-managed API key pool with automatic rotation and rate limit handling. Use modern, minimalist UI/UX with clear upgrade paths. Start with a freemium model, upsell premium, and scale your backend as user demand grows. Use Swift/Kotlin for native apps, Node.js/Python for backend, and WebRTC for video. Always keep API keys secure and never in the client.
