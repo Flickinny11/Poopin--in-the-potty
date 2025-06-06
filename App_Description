@@ -1,163 +1,439 @@
-2. App Description & Features
-VidLingo is a cross-platform video chat app with real-time, AI-powered language translation and lipsync, designed for iOS, Android, Mac, and Windows.
-Core Features:
-	•	Real-time video chat with instant language translation (speech-to-speech)
-	•	AI lipsync for natural, in-language mouth movement
-	•	Supports 50+ languages
-	•	Auto-detect language and seamless switching
-	•	Group and one-on-one video calls
-	•	Conversation transcript and summary
-	•	End-to-end encryption for privacy
-	•	Minimal latency, HD video quality
-Optional Add-ons:
-	•	AR backgrounds and filters
-	•	Meeting recording with translated subtitles
-	•	Scheduled calls and calendar integration
-3. Design & Style
-	•	Modern, minimalist UI: Clean layouts, large video windows, floating translation bubbles
-	•	Color palette: Soft blues and whites for trust and clarity
-	•	Micro-interactions: Subtle animations for translation events and lipsync transitions
-	•	Accessibility: High-contrast mode, large text options
-4. Monetization Model
-Freemium with Premium Upsell:
-	•	Free Tier: Limited video call minutes per month, basic translation (ad-supported)
-	•	Premium Subscription: $9.99/month for unlimited calls, HD video, advanced translation, group calls, and recording
-	•	Pay-Per-Use: $0.99 for 30-minute translation pass (for travelers or occasional users)
-	•	Enterprise Plan: Custom pricing for businesses (integration, analytics, admin controls)
-Revenue Drivers:
-	•	Premium conversions (target: 5-10% of free users)
-	•	Pay-per-use for non-subscribers
-	•	Enterprise contracts for global teams
-5. Technical Integration
-Since you can code the app and handle video streaming:
-	•	You do NOT need a third-party video call API if you build your own video infrastructure (using WebRTC or similar).
-	•	You DO need a translation/lipsync API: integrate HeyGen for real-time translation and lipsync, or Vozo AI for advanced dubbing if you need asynchronous translation.
-Optional:
-	•	Use Google or Microsoft APIs for fallback/basic translation if cost is an issue, but they do not provide lipsync.
-6. Standalone vs. Integration
-	•	Standalone launch is best for speed and control.
-	•	Future: Offer plugins/integrations for Teams, Zoom, etc., once core user base and product stability are achieved.
-7. VidLingo leverages the latest in AI translation and lipsync to deliver natural, engaging, and barrier-free video conversations—maximizing user engagement, retention, and monetization potential.
 
-API Key Management & Rate Limiting Solution for HeyGen
-1. Key Management & Scaling Approach
-	•	Multiple API Keys: Since you can’t get an enterprise key at launch, register several HeyGen accounts (as allowed by their TOS) and obtain separate API keys for each.
-	•	Backend Key Pool: Store all API keys securely on your backend (never in the client). Use a database or encrypted environment variables.
-	•	Key Rotation Logic: Implement a load balancer in your backend to assign keys per request. Distribute traffic evenly to avoid hitting the per-key rate limit.
-	•	Rate Limit Monitoring: Track usage for each key. If a key approaches its quota, automatically switch to another key in the pool.
-	•	Exponential Backoff & Retry: On 429 (rate limit) errors, use exponential backoff before retrying with another key.
-	•	Token Refresh (OAuth): If using OAuth for user-specific actions, manage access/refresh tokens as described in HeyGen’s docs. For API-key access, rotate keys only.
-	•	Alerting: Set up automated alerts for failed requests or when any key nears its limit.
 
-VidLingo: Full App Description & Build Blueprint
-App Overview
-VidLingo is a cross-platform (iOS, Android, Mac, Windows) video chat app with real-time AI-powered translation and lipsync, enabling seamless multilingual conversations.
-Key Features
-	•	Real-time video chat with instant speech-to-speech translation
-	•	AI lipsync for natural, in-language mouth movement
-	•	50+ languages supported
-	•	Auto language detection and switching
-	•	Group and 1:1 calls
-	•	Conversation transcript & summary
-	•	End-to-end encryption
-	•	AR backgrounds and filters
-	•	Meeting recording (premium)
-	•	Usage dashboard (minutes, languages used)
-	•	Invite/share links
-Pricing Structure
-	•	Free Tier:
-	•	10 minutes/month of translation
-	•	Watermarked video
-	•	Ads between calls
-	•	Premium:
-	•	$9.99/month: Unlimited translation, HD, no watermark, group calls, recording, priority support
-	•	Pay-Per-Use:
-	•	$0.99 for a 30-minute translation pass
-	•	Enterprise:
-	•	Custom pricing for teams (bulk minutes, admin dashboard)
-Conversion Tactics:
-	•	Free trial of premium for 7 days
-	•	In-app reminders when free minutes run out
-	•	Discounts for annual subscriptions
-Design & Style Layout Map
-General Style
-	•	Theme: Modern, global, minimalist
-	•	Colors: Soft blue (#3A8DFF), white, light gray backgrounds, accent gradients
-	•	Typography: Inter/SF Pro/Roboto, 16–20pt body, 24–32pt headers
-	•	Buttons: Rounded (8px), blue for primary, white/blue border for secondary, shadow on hover
-	•	Icons: Line icons, consistent stroke, color-coded by function
-Page-by-Page Layout
-1. Splash/Onboarding
-	•	Centered VidLingo logo, fade-in
-	•	Carousel (What is VidLingo, Features, Privacy)
-	•	Large “Sign Up” (blue) and “Log In” (white, blue border)
-	•	SSO: Apple, Google
-2. Home/Dashboard
-	•	Header: Avatar (left), Settings (right)
-	•	Main:
-	•	“Start a Call” (large blue button)
-	•	“Join a Call” (white, blue border)
-	•	Recent Conversations: List with avatar, name, last message, timestamp
-	•	Quick Actions: “Invite Friends”, “Upgrade to Premium” (badge if free)
-3. Video Call Screen
-	•	Full-screen video, rounded corners
-	•	Translation bubble: Bottom center, color-coded, pops in as text is translated
-	•	Lipsync indicator: Animated icon next to video feed
-	•	Controls (bottom bar):
-	•	Mute/unmute
-	•	Camera on/off
-	•	Language switch (dropdown, flags)
-	•	End call (red)
-	•	Add participant (+)
-	•	Record (premium, lock if not)
-	•	AR Filters: Overlay button (top right)
-4. Settings
-	•	Profile: Avatar, name, email, language preference
-	•	Subscription: Plan, upgrade/downgrade, payment info
-	•	Usage: Minutes used, premium status
-	•	Privacy: Encryption toggle, export data
-	•	Notifications: Call invites, translation events
-	•	Support: FAQ, contact, report bug
-5. Premium Upsell
-	•	Banner: “Upgrade for Unlimited Translation” (animated sparkle)
-	•	Features: Unlimited minutes, HD, no watermark, priority support
-	•	CTA: “Upgrade Now” (large blue)
-6. Conversation History
-	•	List: Avatars, participants, date/time
-	•	Detail: Transcript (original + translated), download/share (premium)
-7. Error Handling
-	•	Modal: “Translation Limit Reached – Upgrade for More Minutes” (CTA, buy pass)
-	•	Fallback: “Translation temporarily unavailable, please try again soon.”
-Buttons & Settings
-	•	Primary: Blue, white text, rounded, shadow
-	•	Secondary: White, blue border, blue text
-	•	Danger: Red, white text (end call)
-	•	Disabled: Gray, no shadow
-Settings Options:
-	•	Language selection (dropdown, searchable)
-	•	Video quality (auto, HD, SD)
-	•	AR filter toggle
-	•	Privacy (show/hide online status)
-	•	Notification preferences
-Tech Stack & Language
-	•	Frontend: Swift (iOS, Mac), Kotlin (Android), React (Web), Electron (Windows/Mac)
-	•	Backend: Node.js or Python (for API key management, user auth, rate limiting)
-	•	Video: WebRTC (native or via open-source libraries)
-	•	Translation/Lipsync: HeyGen API (integrated server-side)
-	•	Database: PostgreSQL or MongoDB (user data, key usage tracking)
-	•	API Key Management: Custom backend service as described above
-API Rate Limiting Management
-	•	Distribute requests across multiple keys
-	•	Monitor and log per-key usage
-	•	Switch keys automatically on quota/rate limit errors
-	•	Use exponential backoff and retry logic for 429/5xx errors
-	•	Alert admins when keys are near exhaustion
-	•	Plan to negotiate higher limits as user base grows
-Other Important Planning Details
-	•	Security: Store all API keys and tokens server-side, use HTTPS everywhere, encrypt sensitive data
-	•	Compliance: Ensure GDPR compliance (data export, deletion)
-	•	Scalability: Design backend to add/remove keys easily; use cloud functions or containerized microservices for scaling
-	•	User Experience: Prioritize low-latency translation, clear error messages, and seamless upgrade flow
-	•	Analytics: Track usage, conversion, retention, and error rates for rapid iteration
-Summary:
-Build a backend-managed API key pool with automatic rotation and rate limit handling. Use modern, minimalist UI/UX with clear upgrade paths. Start with a freemium model, upsell premium, and scale your backend as user demand grows. Use Swift/Kotlin for native apps, Node.js/Python for backend, and WebRTC for video. Always keep API keys secure and never in the client.
+Build Complete VidLiSync Production App - Real-Time Video Chat with AI Translation
+
+**Issue Description:**
+
+```markdown
+# VidLiSync: Complete Production Application Build Request
+
+## 🎯 PROJECT OVERVIEW
+
+Build a **complete, production-ready video chat application** called "VidLiSync" that enables real-time conversation between people speaking different languages using AI voice cloning and lip synchronization. Users see and hear each other speaking their native language in their own voice with sub-400ms latency.
+
+**Critical Requirement:** This must be 100% complete, tested, and ready for immediate deployment to production. No placeholders, no TODO comments, no incomplete features.
+
+## 🏗️ TECHNICAL SPECIFICATIONS
+
+### **Core Features Required:**
+- Real-time video calling with WebRTC
+- Live speech-to-speech translation (50+ languages)
+- AI voice cloning to preserve user's voice characteristics
+- Real-time lip synchronization with translated audio
+- User authentication and subscription management
+- Stripe payment integration
+- Contact management and call history
+- Mobile-responsive Progressive Web App
+
+### **Technology Stack:**
+- **Frontend:** Next.js 14 + TypeScript + Tailwind CSS
+- **Backend:** FastAPI (Python) + Node.js (WebSocket)
+- **Database:** Supabase PostgreSQL with Row Level Security
+- **AI Processing:** Wunjo CE (local) + OpenAI Whisper + Google Translate
+- **Video Calling:** Daily.co WebRTC API
+- **Payments:** Stripe
+- **Deployment:** Vercel (frontend) + Railway (backend) + RunPod (AI)
+
+### **Performance Requirements:**
+- Sub-400ms end-to-end translation latency
+- HD video quality (1080p)
+- Support for 2-10 concurrent users per call
+- 99.9% uptime
+- Mobile-first responsive design
+
+## 📁 COMPLETE PROJECT STRUCTURE REQUIRED
+```
+
+vidlisync/
+├── frontend/                     # Next.js 14 Application
+│   ├── public/
+│   │   ├── favicon.ico
+│   │   ├── logo-192.png
+│   │   ├── logo-512.png
+│   │   ├── manifest.json
+│   │   └── robots.txt
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── (auth)/login/page.tsx
+│   │   │   ├── (auth)/signup/page.tsx
+│   │   │   ├── dashboard/page.tsx
+│   │   │   ├── call/[id]/page.tsx
+│   │   │   ├── settings/page.tsx
+│   │   │   ├── pricing/page.tsx
+│   │   │   ├── contact/page.tsx
+│   │   │   ├── privacy/page.tsx
+│   │   │   ├── terms/page.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx (landing page)
+│   │   │   └── globals.css
+│   │   ├── components/
+│   │   │   ├── ui/ (reusable UI components)
+│   │   │   ├── call/ (video call interface)
+│   │   │   ├── auth/ (authentication forms)
+│   │   │   ├── layout/ (navigation, header, footer)
+│   │   │   └── modals/ (popup modals)
+│   │   ├── hooks/ (custom React hooks)
+│   │   ├── lib/ (utilities and configurations)
+│   │   ├── stores/ (Zustand state management)
+│   │   └── types/ (TypeScript definitions)
+│   ├── package.json
+│   ├── tailwind.config.js
+│   ├── next.config.js
+│   └── tsconfig.json
+├── backend/                      # FastAPI Backend
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth.py
+│   │   │   ├── calls.py
+│   │   │   ├── billing.py
+│   │   │   ├── users.py
+│   │   │   └── translation.py
+│   │   ├── core/
+│   │   │   ├── config.py
+│   │   │   ├── database.py
+│   │   │   └── security.py
+│   │   ├── models/
+│   │   │   ├── user.py
+│   │   │   ├── call.py
+│   │   │   └── subscription.py
+│   │   ├── services/
+│   │   │   ├── translation_service.py
+│   │   │   ├── stripe_service.py
+│   │   │   └── daily_service.py
+│   │   └── main.py
+│   ├── requirements.txt
+│   └── Dockerfile
+├── realtime/                     # Node.js WebSocket Service
+│   ├── src/
+│   │   ├── socket-handlers.js
+│   │   ├── translation-pipeline.js
+│   │   └── server.js
+│   ├── package.json
+│   └── Dockerfile
+├── wunjo-service/               # Wunjo CE API Wrapper
+│   ├── main.py
+│   ├── voice_service.py
+│   ├── requirements.txt
+│   └── Dockerfile
+└── deployment/                   # Deployment Configurations
+├── docker-compose.yml
+├── railway.toml
+└── vercel.json
+
+```
+## 🎨 COMPLETE UI/UX SPECIFICATIONS
+
+### **Design System:**
+- **Primary Colors:** Blue (#3B82F6) to Purple (#8B5CF6) gradients
+- **Typography:** Inter font family
+- **Style:** Modern, glassmorphism effects, rounded corners (xl)
+- **Animations:** Framer Motion with smooth transitions
+- **Mobile-first:** Responsive design for all screen sizes
+
+### **Required Pages with Exact Specifications:**
+
+#### **1. Landing Page (`/`):**
+- Hero section with gradient background and floating language symbols
+- "Speak Any Language, Sound Like You" as main headline
+- Live demo video player
+- Feature cards with icons (voice cloning, lip sync, real-time translation)
+- Testimonials carousel with user photos and ratings
+- Pricing table with 4 tiers (Free, Basic $4.99, Pro $19.99, Business $49.99)
+- FAQ section
+- Footer with links and social media
+
+#### **2. Authentication Pages:**
+- Sign up/Login with email + social OAuth (Google, Apple)
+- Proper form validation with Zod
+- Error handling and loading states
+- Redirect to dashboard after authentication
+
+#### **3. Dashboard (`/dashboard`):**
+- Welcome section with user's name
+- Quick action buttons (Start Call, Join Call)
+- Language preference settings
+- Recent calls history
+- Usage statistics (minutes used, languages, calls made)
+- Quick contacts list
+
+#### **4. Video Call Interface (`/call/[id]`):**
+- Split-screen video layout
+- Real-time translation overlay with original and translated text
+- Control bar with microphone, camera, translation toggle, settings, end call
+- Language switcher dropdown
+- Call quality indicator
+- User info overlays showing spoken language
+
+#### **5. Settings Page (`/settings`):**
+- Tabbed interface: Profile, Audio/Video, Languages, Notifications, Privacy, Billing
+- Voice training upload interface
+- Subscription management with Stripe integration
+- Privacy controls and data settings
+
+### **Component Specifications:**
+
+#### **Button Styles:**
+```css
+Primary: bg-gradient-to-r from-primary-500 to-secondary-500, rounded-xl, px-6 py-3
+Secondary: bg-white border-2 border-gray-200, rounded-xl, px-6 py-3
+Outline: border-2 border-primary-500, rounded-xl, px-6 py-3
+```
+
+#### **Input Fields:**
+
+```css
+Style: border-2 border-gray-200 focus:border-primary-500 rounded-xl px-4 py-3
+Focus: ring-4 ring-primary-500/20
+```
+
+#### **Cards:**
+
+```css
+Style: bg-white rounded-2xl p-6 shadow-sm border border-gray-200
+Hover: shadow-lg transition-all duration-300
+```
+
+## 🗄️ DATABASE SCHEMA
+
+Create complete Supabase PostgreSQL schema with these tables:
+
+- `users` (id, email, full_name, subscription_tier, voice_profile_trained, usage_stats)
+- `calls` (id, caller_id, callee_id, duration, languages, status, recording_url)
+- `voice_profiles` (id, user_id, language, voice_data, is_trained)
+- `subscriptions` (id, user_id, stripe_subscription_id, tier, status)
+- `usage_logs` (id, user_id, call_id, minutes_used, feature_used)
+- `contacts` (id, user_id, contact_user_id, favorite, preferred_language_pair)
+- `user_settings` (id, user_id, audio_video_preferences, privacy_settings)
+
+Include Row Level Security policies for all tables.
+
+## 🔌 API INTEGRATIONS
+
+### **Required Environment Variables:**
+
+```bash
+# Frontend (.env.local)
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_DAILY_API_KEY=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_API_BASE_URL=
+
+# Backend (.env)
+SUPABASE_URL=
+SUPABASE_SERVICE_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+GOOGLE_TRANSLATE_API_KEY=
+DAILY_API_KEY=
+WUNJO_API_URL=http://localhost:5000
+```
+
+### **API Endpoints Required:**
+
+#### **Authentication:**
+
+- `POST /api/auth/signup` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Get current user
+
+#### **Video Calls:**
+
+- `POST /api/calls/create` - Create new call room
+- `POST /api/calls/join/{call_id}` - Join existing call
+- `GET /api/calls/history` - Get user’s call history
+- `POST /api/calls/{call_id}/feedback` - Submit call feedback
+
+#### **Translation:**
+
+- `POST /api/translate/stream` - Real-time audio translation
+- `POST /api/translate/voice-profile` - Create/update voice profile
+- `GET /api/translate/languages` - Get supported language pairs
+
+#### **Billing:**
+
+- `GET /api/billing/plans` - Get pricing plans
+- `POST /api/billing/subscribe` - Create subscription
+- `POST /api/billing/cancel` - Cancel subscription
+- `GET /api/billing/usage` - Get usage statistics
+
+#### **WebSocket Events:**
+
+- `audio_chunk` - Send audio for translation
+- `translated_audio` - Receive translated audio
+- `call_quality` - Real-time quality metrics
+- `user_status` - Online/offline status
+
+## 🤖 WUNJO CE INTEGRATION
+
+### **Wunjo Service Requirements:**
+
+1. Clone Wunjo CE from: `https://github.com/wladradchenko/wunjo.wladradchenko.ru`
+1. Create FastAPI wrapper with endpoints:
+- `POST /api/voice-clone-lipsync` - Main processing endpoint
+- `GET /health` - Health check
+1. Docker containerization for easy deployment
+1. Automatic model downloading on first run
+1. Real-time streaming processing for sub-400ms latency
+
+### **Translation Pipeline:**
+
+```
+User Audio → Whisper STT → Google Translate → Wunjo Voice Clone + Lip Sync → Output
+```
+
+## 💳 STRIPE INTEGRATION
+
+### **Pricing Tiers:**
+
+1. **Free:** $0 - 5 minutes/month, 1-on-1 calls, 5 languages
+1. **Basic:** $4.99/month - 60 minutes/month, 15 languages, HD quality
+1. **Pro:** $19.99/month - 300 minutes/month, all languages, group calls
+1. **Business:** $49.99/month - Unlimited, team features, priority support
+
+### **Required Stripe Features:**
+
+- Subscription creation and management
+- Payment method updates
+- Invoice generation
+- Usage-based billing
+- Webhook handling for subscription events
+
+## 📱 DEPLOYMENT SPECIFICATIONS
+
+### **Frontend Deployment (Vercel):**
+
+```json
+{
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key"
+    }
+  },
+  "functions": {
+    "app/api/**": {
+      "maxDuration": 30
+    }
+  }
+}
+```
+
+### **Backend Deployment (Railway):**
+
+```toml
+[build]
+builder = "DOCKERFILE"
+buildCommand = "pip install -r requirements.txt"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+```
+
+### **AI Service Deployment (RunPod):**
+
+- Docker image with Wunjo CE
+- GPU-enabled (RTX 4070 minimum)
+- Auto-scaling configuration
+- Health monitoring
+
+## 🧪 TESTING REQUIREMENTS
+
+Include comprehensive testing:
+
+- Unit tests for all API endpoints
+- Integration tests for payment flows
+- E2E tests for video calling workflow
+- Performance tests for translation latency
+- Accessibility tests (WCAG 2.1 AA)
+
+## 📋 ACCEPTANCE CRITERIA
+
+The application is complete when:
+
+- [ ] Users can sign up, login, and manage profiles
+- [ ] Video calling works with HD quality
+- [ ] Real-time translation with sub-400ms latency
+- [ ] Voice cloning preserves user’s voice characteristics
+- [ ] Lip sync looks natural and synchronized
+- [ ] Stripe payments work for all subscription tiers
+- [ ] All 50+ language pairs function correctly
+- [ ] Mobile responsive on all devices
+- [ ] Deployed and accessible via custom domain
+- [ ] SSL certificates configured
+- [ ] Database migrations complete
+- [ ] Monitoring and analytics configured
+- [ ] Legal pages (Terms, Privacy) included
+- [ ] Error handling and loading states
+- [ ] SEO optimization complete
+
+## 💼 BUSINESS REQUIREMENTS
+
+### **Legal Compliance:**
+
+- GDPR compliant data handling
+- Terms of Service and Privacy Policy
+- Cookie consent management
+- Data retention policies
+
+### **Analytics Integration:**
+
+- User behavior tracking
+- Call quality metrics
+- Conversion funnel analysis
+- Revenue reporting
+
+### **Marketing Pages:**
+
+- Landing page with conversion optimization
+- Pricing page with comparison table
+- Contact page with support form
+- About page with team information
+
+## 🚀 LAUNCH CHECKLIST
+
+Before marking complete, ensure:
+
+- [ ] Domain configured (vidlisync.com)
+- [ ] SSL certificates active
+- [ ] Database backups configured
+- [ ] Monitoring alerts setup
+- [ ] Performance optimization complete
+- [ ] Security audit passed
+- [ ] Load testing completed
+- [ ] Documentation written
+- [ ] Admin dashboard functional
+- [ ] Customer support integration
+
+## 📞 SUPPORT REQUIREMENTS
+
+Include customer support features:
+
+- In-app help documentation
+- Live chat integration (Intercom/Zendesk)
+- Feedback collection system
+- Bug reporting mechanism
+- Feature request submission
+
+-----
+
+**CRITICAL:** This application must be 100% production-ready upon completion. Users should be able to sign up, make payments, and start video calling with translation immediately. No features should be incomplete or marked as “coming soon.”
+
+**Success Metrics:**
+
+- Sub-400ms translation latency achieved
+- 99%+ uptime during testing
+- Payment flows working correctly
+- All core features functional
+- Mobile responsive design
+- SEO score 90+ on Lighthouse
+- Accessibility score 90+ on Lighthouse
+
+```
+---
+
+This GitHub issue provides complete specifications for an AI coding agent to build the entire VidLiSync application. It includes every technical detail, design requirement, business logic, and deployment specification needed for a production-ready launch.​​​​​​​​​​​​​​​​
+```
