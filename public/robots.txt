@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://vidlisync.com/sitemap.xml
+
+# Block AI crawlers for privacy
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+# Block private areas
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/

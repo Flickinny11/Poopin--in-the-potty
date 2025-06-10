@@ -1,0 +1,92 @@
+{
+  "name": "VidLiSync - Real-time Video Chat with AI Translation",
+  "short_name": "VidLiSync",
+  "description": "Break language barriers with AI-powered video chat. Real-time translation that preserves your voice.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["communication", "productivity", "social"],
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icons/manifest-icon-192.maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/manifest-icon-192.maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/manifest-icon-512.maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/manifest-icon-512.maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "VidLiSync Desktop Interface"
+    },
+    {
+      "src": "/screenshots/mobile-1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "VidLiSync Mobile Interface"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Video Call",
+      "short_name": "New Call",
+      "description": "Start a new video call with AI translation",
+      "url": "/dashboard?action=start-call",
+      "icons": [
+        {
+          "src": "/icons/shortcut-video.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Join Call",
+      "short_name": "Join",
+      "description": "Join an existing video call",
+      "url": "/dashboard?action=join-call",
+      "icons": [
+        {
+          "src": "/icons/shortcut-join.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/dashboard",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}
