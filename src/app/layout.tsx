@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
+import { NotificationToasts } from '@/components/NotificationCenter'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -78,6 +79,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ServiceWorkerRegistration />
+        <NotificationToasts />
         {children}
       </body>
     </html>
