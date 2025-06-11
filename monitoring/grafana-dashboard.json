@@ -1,0 +1,214 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "VidLiSync Production Monitoring",
+    "description": "Comprehensive monitoring dashboard for VidLiSync production environment",
+    "tags": ["vidlisync", "production", "monitoring"],
+    "timezone": "UTC",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "🎯 System Overview",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "up{job=\"vidlisync-frontend\"}",
+            "legendFormat": "Frontend Status"
+          },
+          {
+            "expr": "up{job=\"vidlisync-backend\"}",
+            "legendFormat": "Backend Status"
+          },
+          {
+            "expr": "up{job=\"vidlisync-ai\"}",
+            "legendFormat": "AI Service Status"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {"displayMode": "basic"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "📊 Request Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"vidlisync-backend\"}[5m])",
+            "legendFormat": "Backend RPS"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"vidlisync-frontend\"}[5m])",
+            "legendFormat": "Frontend RPS"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests per second",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "⚡ Response Time",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"vidlisync-backend\"}[5m]))",
+            "legendFormat": "Backend P95"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"vidlisync-backend\"}[5m]))",
+            "legendFormat": "Backend P50"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "💾 Database Performance",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "postgresql_database_size_bytes{database=\"vidlisync\"}",
+            "legendFormat": "Database Size"
+          },
+          {
+            "expr": "rate(postgresql_database_xact_commit_total{database=\"vidlisync\"}[5m])",
+            "legendFormat": "Transactions/sec"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "🔧 AI Service Metrics",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "nvidia_gpu_utilization_percentage",
+            "legendFormat": "GPU Utilization %"
+          },
+          {
+            "expr": "rate(ai_translation_requests_total[5m])",
+            "legendFormat": "Translation Requests/sec"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "💰 Business Metrics",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "increase(stripe_successful_payments_total[24h])",
+            "legendFormat": "Daily Revenue"
+          },
+          {
+            "expr": "vidlisync_active_users_total",
+            "legendFormat": "Active Users"
+          },
+          {
+            "expr": "vidlisync_total_calls_today",
+            "legendFormat": "Calls Today"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "🚨 Error Rates",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"vidlisync-backend\",status=~\"5..\"}[5m])",
+            "legendFormat": "Backend 5xx Errors"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"vidlisync-frontend\",status=~\"5..\"}[5m])",
+            "legendFormat": "Frontend 5xx Errors"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "query": {"queryType": "", "refId": "A"},
+              "reducer": {"type": "last", "params": []},
+              "evaluator": {"params": [0.01], "type": "gt"}
+            }
+          ],
+          "executionErrorState": "alerting",
+          "noDataState": "no_data",
+          "frequency": "10s",
+          "message": "High error rate detected in VidLiSync",
+          "name": "VidLiSync High Error Rate"
+        }
+      },
+      {
+        "id": 8,
+        "title": "📈 Resource Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32},
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{container=~\"vidlisync.*\"}[5m]) * 100",
+            "legendFormat": "CPU Usage %"
+          },
+          {
+            "expr": "container_memory_usage_bytes{container=~\"vidlisync.*\"} / container_spec_memory_limit_bytes * 100",
+            "legendFormat": "Memory Usage %"
+          }
+        ]
+      }
+    ],
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": false,
+          "iconColor": "green",
+          "tags": ["deployment", "vidlisync"]
+        }
+      ]
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "custom",
+          "options": [
+            {"text": "production", "value": "production", "selected": true},
+            {"text": "staging", "value": "staging", "selected": false}
+          ]
+        }
+      ]
+    }
+  }
+}

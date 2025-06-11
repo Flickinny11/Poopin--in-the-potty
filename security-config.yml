@@ -1,0 +1,281 @@
+# VidLiSync Production Security Configuration
+# Complete security hardening for production deployment
+
+security:
+  # SSL/TLS Configuration
+  ssl:
+    min_version: "1.2"
+    cipher_suites:
+      - "TLS_AES_256_GCM_SHA384"
+      - "TLS_CHACHA20_POLY1305_SHA256"
+      - "TLS_AES_128_GCM_SHA256"
+    hsts:
+      enabled: true
+      max_age: 31536000
+      include_subdomains: true
+      preload: true
+    
+  # Security Headers
+  headers:
+    strict_transport_security: "max-age=31536000; includeSubDomains; preload"
+    content_security_policy: >
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://maps.googleapis.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https: blob:;
+      connect-src 'self' https://api.vidlisync.com https://ai.vidlisync.com wss: https://*.supabase.co;
+      media-src 'self' blob:;
+      object-src 'none';
+      base-uri 'self';
+      frame-ancestors 'none';
+      upgrade-insecure-requests;
+    x_content_type_options: "nosniff"
+    x_frame_options: "DENY"
+    x_xss_protection: "1; mode=block"
+    referrer_policy: "strict-origin-when-cross-origin"
+    permissions_policy: >
+      camera=*,
+      microphone=*,
+      display-capture=*,
+      geolocation=(),
+      payment=(),
+      usb=()
+
+  # Rate Limiting
+  rate_limiting:
+    api:
+      requests_per_minute: 100
+      burst: 20
+      window: 60
+    auth:
+      requests_per_minute: 10
+      burst: 5
+      window: 300
+    webhooks:
+      requests_per_minute: 50
+      burst: 10
+      window: 60
+    uploads:
+      requests_per_minute: 20
+      burst: 5
+      window: 60
+
+  # WAF Rules
+  waf:
+    enabled: true
+    rules:
+      - name: "Block SQL Injection"
+        expression: "(http.request.body contains \"union select\" or http.request.body contains \"drop table\")"
+        action: "block"
+      - name: "Block XSS Attempts"
+        expression: "(http.request.body contains \"<script\" or http.request.uri.query contains \"javascript:\")"
+        action: "block"
+      - name: "Admin Access Control"
+        expression: "(http.request.uri.path contains \"/admin\" and not ip.src in {192.168.1.0/24 10.0.0.0/8})"
+        action: "challenge"
+      - name: "Suspicious User Agents"
+        expression: "(http.user_agent contains \"sqlmap\" or http.user_agent contains \"nikto\")"
+        action: "block"
+      - name: "High Threat Score"
+        expression: "(cf.threat_score gt 14)"
+        action: "js_challenge"
+
+  # DDoS Protection
+  ddos_protection:
+    enabled: true
+    sensitivity: "medium"
+    thresholds:
+      requests_per_second: 1000
+      concurrent_connections: 500
+      bandwidth_mbps: 100
+
+  # Bot Management
+  bot_management:
+    enabled: true
+    allow_verified_bots: true
+    blocked_user_agents:
+      - "sqlmap"
+      - "nikto"
+      - "nmap"
+      - "masscan"
+    challenge_unverified: true
+
+  # API Security
+  api_security:
+    authentication:
+      required: true
+      type: "JWT"
+      expiry: 3600
+      refresh_enabled: true
+    authorization:
+      rbac_enabled: true
+      permissions:
+        read: ["user", "admin"]
+        write: ["admin"]
+        delete: ["admin"]
+    input_validation:
+      enabled: true
+      max_request_size: "10MB"
+      allowed_content_types:
+        - "application/json"
+        - "multipart/form-data"
+        - "application/x-www-form-urlencoded"
+
+  # Database Security
+  database:
+    encryption_at_rest: true
+    encryption_in_transit: true
+    ssl_required: true
+    connection_pooling:
+      enabled: true
+      max_connections: 20
+      idle_timeout: 300
+    row_level_security: true
+    audit_logging: true
+
+  # Secret Management
+  secrets:
+    encryption: "AES-256"
+    rotation_period: "90d"
+    access_logging: true
+    vault_integration: true
+
+  # Network Security
+  network:
+    firewall:
+      enabled: true
+      default_policy: "deny"
+      allowed_ports:
+        - "80/tcp"   # HTTP
+        - "443/tcp"  # HTTPS
+        - "22/tcp"   # SSH (restricted)
+    vpn_required: false
+    ip_allowlist:
+      admin_endpoints:
+        - "192.168.1.0/24"
+        - "10.0.0.0/8"
+    geo_blocking:
+      enabled: false  # Set to true if needed
+      blocked_countries: []
+
+  # Monitoring and Alerting
+  monitoring:
+    security_events:
+      enabled: true
+      log_level: "INFO"
+      alert_thresholds:
+        failed_logins: 10
+        blocked_requests: 100
+        suspicious_activity: 5
+    vulnerability_scanning:
+      enabled: true
+      schedule: "daily"
+      auto_remediation: false
+
+  # Compliance
+  compliance:
+    gdpr:
+      enabled: true
+      data_retention: "2y"
+      right_to_deletion: true
+      consent_tracking: true
+    pci_dss:
+      enabled: true
+      data_encryption: true
+      access_controls: true
+      audit_trails: true
+    sox:
+      enabled: false
+      audit_trails: true
+      change_management: true
+
+  # Incident Response
+  incident_response:
+    auto_block_enabled: true
+    notification_channels:
+      - "email"
+      - "slack"
+      - "pagerduty"
+    escalation_matrix:
+      level_1: "security@vidlisync.com"
+      level_2: "cto@vidlisync.com"
+      level_3: "ceo@vidlisync.com"
+
+  # Backup and Recovery
+  backup:
+    encryption: true
+    frequency: "daily"
+    retention: "90d"
+    offsite_storage: true
+    recovery_testing: "monthly"
+
+  # Content Security
+  content_security:
+    file_uploads:
+      max_size: "10MB"
+      allowed_types:
+        - "image/jpeg"
+        - "image/png"
+        - "image/gif"
+        - "audio/wav"
+        - "audio/mp3"
+        - "video/mp4"
+      virus_scanning: true
+    data_sanitization:
+      enabled: true
+      html_filtering: true
+      sql_escaping: true
+
+  # Third-party Security
+  third_party:
+    dependency_scanning: true
+    license_compliance: true
+    vulnerability_alerts: true
+    update_schedule: "weekly"
+
+# Security Checklist for Production
+security_checklist:
+  pre_deployment:
+    - "Update all dependencies to latest versions"
+    - "Run security vulnerability scan"
+    - "Review and test all security configurations"
+    - "Verify SSL certificate installation"
+    - "Test rate limiting and WAF rules"
+    - "Validate authentication and authorization"
+    - "Review database security settings"
+    - "Test backup and recovery procedures"
+    
+  post_deployment:
+    - "Monitor security alerts and logs"
+    - "Verify all security headers are present"
+    - "Test incident response procedures"
+    - "Review access logs for anomalies"
+    - "Validate monitoring and alerting"
+    - "Perform security testing"
+    - "Update security documentation"
+    - "Schedule regular security reviews"
+
+# Emergency Procedures
+emergency_procedures:
+  security_breach:
+    immediate_actions:
+      - "Isolate affected systems"
+      - "Notify security team"
+      - "Preserve evidence"
+      - "Assess impact and scope"
+    
+  ddos_attack:
+    immediate_actions:
+      - "Enable enhanced DDoS protection"
+      - "Monitor traffic patterns"
+      - "Notify infrastructure team"
+      - "Scale resources if needed"
+    
+  data_breach:
+    immediate_actions:
+      - "Contain the breach"
+      - "Assess data exposure"
+      - "Notify legal team"
+      - "Prepare user notifications"
+      - "Document incident"

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "numReplicas": 3,
+    "sleepApplication": false,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  },
+  "healthcheck": {
+    "enabled": true,
+    "path": "/health",
+    "timeout": 30,
+    "interval": 60
+  },
+  "scaling": {
+    "minReplicas": 2,
+    "maxReplicas": 10,
+    "cpuThreshold": 70,
+    "memoryThreshold": 80
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "ENVIRONMENT": "production",
+        "PORT": "8000",
+        "HOST": "0.0.0.0",
+        "WORKERS": "4",
+        "LOG_LEVEL": "INFO",
+        "ENABLE_RATE_LIMITING": "true",
+        "MAX_REQUESTS_PER_MINUTE": "100",
+        "DATABASE_POOL_SIZE": "20",
+        "DATABASE_MAX_OVERFLOW": "5"
+      }
+    }
+  }
+}

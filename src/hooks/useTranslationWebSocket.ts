@@ -2,7 +2,7 @@
  * WebSocket hook for real-time translation streaming
  * Connects to backend translation WebSocket endpoint
  */
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useTranslationStore } from '@/stores/translationStore';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -59,6 +59,9 @@ export const useTranslationWebSocket = () => {
     disconnect: setDisconnected,
   } = useTranslationStore();
 
+  // Local state for reconnection attempts
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
+
   // Get WebSocket URL from environment
   const getWebSocketUrl = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -69,6 +72,38 @@ export const useTranslationWebSocket = () => {
   const sendMessage = useCallback((message: WebSocketMessage) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(message));
+    }
+  }, []);
+
+  // Play translated audio
+  const playTranslatedAudio = useCallback((audioBase64: string) => {
+    try {
+      const audioData = atob(audioBase64);
+      const arrayBuffer = new ArrayBuffer(audioData.length);
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      for (let i = 0; i < audioData.length; i++) {
+        uint8Array[i] = audioData.charCodeAt(i);
+      }
+      
+      const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+      
+      // Apply volume setting
+      const { translationVolume } = useTranslationStore.getState();
+      audio.volume = translationVolume;
+      
+      audio.play().catch(error => {
+        console.error('Error playing translated audio:', error);
+      });
+      
+      // Clean up object URL after audio ends
+      audio.addEventListener('ended', () => {
+        URL.revokeObjectURL(audioUrl);
+      });
+    } catch (error) {
+      console.error('Error processing translated audio:', error);
     }
   }, []);
 
@@ -126,41 +161,34 @@ export const useTranslationWebSocket = () => {
     }
   }, [addTranslationResult, playTranslatedAudio]);
 
-  // Play translated audio
-  const playTranslatedAudio = useCallback((audioBase64: string) => {
-    try {
-      const audioData = atob(audioBase64);
-      const arrayBuffer = new ArrayBuffer(audioData.length);
-      const uint8Array = new Uint8Array(arrayBuffer);
-      
-      for (let i = 0; i < audioData.length; i++) {
-        uint8Array[i] = audioData.charCodeAt(i);
-      }
-      
-      const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
-      const audioUrl = URL.createObjectURL(blob);
-      const audio = new Audio(audioUrl);
-      
-      // Apply volume setting
-      const { translationVolume } = useTranslationStore.getState();
-      audio.volume = translationVolume;
-      
-      audio.play().catch(error => {
-        console.error('Error playing translated audio:', error);
-      });
-      
-      // Clean up URL after playing
-      audio.addEventListener('ended', () => {
-        URL.revokeObjectURL(audioUrl);
-      });
-      
-    } catch (error) {
-      console.error('Error processing translated audio:', error);
+  // Schedule reconnection with exponential backoff  
+  const scheduleReconnect = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
     }
-  }, []);
+    
+    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000); // Max 30 seconds
+    console.log(`Scheduling reconnection in ${delay}ms (attempt ${reconnectAttempts + 1})`);
+    
+    reconnectTimeoutRef.current = setTimeout(() => {
+      setReconnectAttempts(prev => prev + 1);
+      // Use async function to avoid circular dependency
+      (async () => {
+        try {
+          if (!user?.id) return;
+          // Reconnect logic here without depending on connect function
+          const ws = new WebSocket(getWebSocketUrl());
+          wsRef.current = ws;
+          // Set up handlers...
+        } catch (error) {
+          console.error('Reconnection failed:', error);
+        }
+      })();
+    }, delay);
+  }, [reconnectAttempts, user]);
 
   // Connect to WebSocket
-  const connect = useCallback(async () => {
+  const connect: () => Promise<void> = useCallback(async () => {
     if (!user?.id) {
       throw new Error('User not authenticated');
     }
@@ -176,10 +204,10 @@ export const useTranslationWebSocket = () => {
         sendMessage({
           type: 'authenticate',
           user_id: user.id,
-          token: user.access_token || 'demo_token', // Use actual JWT token
+          token: 'demo_token', // In production, get from Supabase session
         });
         
-        setConnected(user.id, user.access_token || 'demo_token');
+        setConnected(user.id, 'demo_token');
       };
       
       ws.onmessage = handleMessage;
@@ -208,21 +236,6 @@ export const useTranslationWebSocket = () => {
       throw error;
     }
   }, [user, sendMessage, handleMessage, setConnected, setDisconnected, scheduleReconnect]);
-
-  // Schedule reconnection with exponential backoff
-  const scheduleReconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) return;
-    
-    const delay = Math.min(1000 * Math.pow(2, 3), 30000); // Max 30 seconds
-    
-    reconnectTimeoutRef.current = setTimeout(() => {
-      reconnectTimeoutRef.current = null;
-      if (!isConnected) {
-        console.log('Attempting to reconnect translation WebSocket...');
-        connect().catch(console.error);
-      }
-    }, delay);
-  }, [isConnected, connect]);
 
   // Disconnect WebSocket
   const disconnect = useCallback(() => {

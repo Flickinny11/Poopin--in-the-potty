@@ -103,7 +103,12 @@ export class TranslationErrorBoundary extends Component<Props, State> {
     // Automatically switch to fallback mode in translation store
     try {
       import('@/stores/translationStore').then(({ useTranslationStore }) => {
-        useTranslationStore.getState().setFallbackMode(this.state.fallbackMode);
+        // Map fallback mode to valid translation store mode
+        const storeMode = this.state.fallbackMode === 'video-only' ? 'text-only' : 
+                         this.state.fallbackMode === 'minimal' ? 'off' :
+                         'original-audio';
+        
+        useTranslationStore.getState().setFallbackMode(storeMode);
         
         // If translation was active, stop it
         if (useTranslationStore.getState().isTranslationActive) {
