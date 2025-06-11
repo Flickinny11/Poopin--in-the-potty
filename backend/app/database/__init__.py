@@ -258,6 +258,51 @@ class DatabaseManager:
         """
         result = await self.fetch_one(query, {"email": email})
         return dict(result) if result else None
+    
+    async def log_usage(self, user_id, feature_used: str, usage_data: dict = None, session_id: str = None, ip_address: str = None, user_agent: str = None):
+        """Log feature usage"""
+        query = """
+        INSERT INTO usage_logs (
+            user_id, feature_used, usage_data, session_id, ip_address, user_agent
+        ) VALUES (
+            :user_id, :feature_used, :usage_data, :session_id, :ip_address, :user_agent
+        ) RETURNING id
+        """
+        return await self.execute_query(query, {
+            "user_id": str(user_id),
+            "feature_used": feature_used,
+            "usage_data": usage_data,
+            "session_id": session_id,
+            "ip_address": ip_address,
+            "user_agent": user_agent
+        })
+    
+    async def update_call_duration(self, call_id, duration_seconds: int):
+        """Update call duration and log usage"""
+        query = """
+        UPDATE calls 
+        SET duration = :duration, ended_at = NOW(), updated_at = NOW()
+        WHERE id = :call_id
+        RETURNING caller_id, callee_id
+        """
+        result = await self.fetch_one(query, {
+            "call_id": str(call_id),
+            "duration": duration_seconds
+        })
+        
+        if result:
+            # Log usage for both participants
+            minutes_used = duration_seconds / 60
+            usage_data = {
+                "call_id": str(call_id),
+                "duration_seconds": duration_seconds,
+                "minutes_used": minutes_used
+            }
+            
+            await self.log_usage(result['caller_id'], "call_minutes", usage_data)
+            await self.log_usage(result['callee_id'], "call_minutes", usage_data)
+        
+        return result
 
 # Global database manager instance
 db_manager = DatabaseManager()

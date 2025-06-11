@@ -1,7 +1,7 @@
 """
 Call management endpoints
 """
-from fastapi import APIRouter, HTTPException, Depends, status, Query
+from fastapi import APIRouter, HTTPException, Depends, status, Query, Request
 from typing import List, Optional
 from uuid import UUID, uuid4
 import logging
@@ -11,7 +11,7 @@ from ..schemas import (
     CallResponse, CallCreate, CallUpdate, APIResponse, 
     PaginatedResponse, CallStatus
 )
-from ..middleware.auth import get_current_active_user
+from ..middleware.auth import get_current_active_user, require_usage_limit
 from ..database import db_manager
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,8 @@ router = APIRouter()
 @router.post("/", response_model=CallResponse)
 async def create_call(
     call_data: CallCreate,
-    current_user: dict = Depends(get_current_active_user)
+    request: Request,
+    current_user: dict = Depends(require_usage_limit("daily_calls", 1))
 ):
     """
     Create a new call
@@ -67,6 +68,20 @@ async def create_call(
     
     try:
         new_call = await db_manager.fetch_one(query, values)
+        
+        # Log the call creation
+        await db_manager.log_usage(
+            caller_id,
+            "call_created",
+            {
+                "call_id": str(new_call["id"]),
+                "callee_id": str(call_data.callee_id),
+                "room_id": room_id
+            },
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent")
+        )
+        
         return CallResponse(**dict(new_call))
         
     except Exception as e:
@@ -294,7 +309,7 @@ async def end_call(
     
     # Verify user is part of the call
     query = """
-    SELECT id, started_at
+    SELECT id, caller_id, callee_id, started_at
     FROM calls
     WHERE id = :call_id AND (caller_id = :user_id OR callee_id = :user_id) 
           AND status = 'active'
@@ -330,6 +345,20 @@ async def end_call(
     
     try:
         ended_call = await db_manager.fetch_one(update_query, {"call_id": str(call_id)})
+        
+        # Log usage for both participants when call ends
+        if ended_call["duration"] and ended_call["duration"] > 0:
+            minutes_used = ended_call["duration"] / 60
+            usage_data = {
+                "call_id": str(call_id),
+                "duration_seconds": ended_call["duration"],
+                "minutes_used": minutes_used
+            }
+            
+            # Log for both caller and callee
+            await db_manager.log_usage(ended_call["caller_id"], "call_minutes", usage_data)
+            await db_manager.log_usage(ended_call["callee_id"], "call_minutes", usage_data)
+        
         return CallResponse(**dict(ended_call))
         
     except Exception as e:

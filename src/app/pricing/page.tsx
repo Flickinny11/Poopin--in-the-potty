@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { VidLiSyncLogo } from '@/components/VidLiSyncLogo'
 import { CheckIcon } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 
 const PRICING_PLANS = [
   {
@@ -113,11 +114,20 @@ export default function PricingPage() {
     }
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token
+      
+      if (!accessToken) {
+        // Redirect to login if not authenticated
+        window.location.href = '/auth/login'
+        return
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/billing/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.access_token}`
+          'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify({
           price_id: priceId,
@@ -268,7 +278,7 @@ export default function PricingPage() {
                 Can I change my plan anytime?
               </h3>
               <p className="text-gray-600">
-                Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and you'll be prorated for any differences.
+                Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and you&apos;ll be prorated for any differences.
               </p>
             </div>
             
@@ -277,7 +287,7 @@ export default function PricingPage() {
                 What happens if I exceed my minutes?
               </h3>
               <p className="text-gray-600">
-                We'll notify you when you're approaching your limit. You can upgrade your plan or wait for your next billing cycle to continue using the service.
+                We&apos;ll notify you when you&apos;re approaching your limit. You can upgrade your plan or wait for your next billing cycle to continue using the service.
               </p>
             </div>
             
@@ -295,7 +305,7 @@ export default function PricingPage() {
                 Do you offer refunds?
               </h3>
               <p className="text-gray-600">
-                We offer a 30-day money-back guarantee. If you're not satisfied with our service, contact us for a full refund.
+                We offer a 30-day money-back guarantee. If you&apos;re not satisfied with our service, contact us for a full refund.
               </p>
             </div>
           </div>

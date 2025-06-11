@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
+import { supabase } from '@/lib/supabase'
 import { 
   CreditCardIcon, 
   CalendarIcon, 
@@ -60,20 +61,29 @@ export default function BillingPage() {
     }
     
     fetchBillingData()
-  }, [user, router])
+  }, [user, router]) // Removing fetchBillingData from deps as it's defined inside component
 
   const fetchBillingData = async () => {
-    if (!user?.access_token) return
+    if (!user) return
 
     try {
       setLoading(true)
+      
+      // Get the session to access the access token
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token
+      
+      if (!accessToken) {
+        setError('No access token available')
+        return
+      }
       
       // Fetch subscription
       const subscriptionResponse = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/billing/subscription`,
         {
           headers: {
-            'Authorization': `Bearer ${user.access_token}`
+            'Authorization': `Bearer ${accessToken}`
           }
         }
       )
@@ -88,7 +98,7 @@ export default function BillingPage() {
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/billing/usage`,
         {
           headers: {
-            'Authorization': `Bearer ${user.access_token}`
+            'Authorization': `Bearer ${accessToken}`
           }
         }
       )
@@ -117,19 +127,27 @@ export default function BillingPage() {
   }
 
   const handleCancelSubscription = async () => {
-    if (!user?.access_token || !subscription) return
+    if (!user || !subscription) return
 
     if (!confirm('Are you sure you want to cancel your subscription? It will remain active until the end of your current billing period.')) {
       return
     }
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token
+      
+      if (!accessToken) {
+        setError('Authentication required')
+        return
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/billing/subscription/cancel`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${user.access_token}`
+            'Authorization': `Bearer ${accessToken}`
           }
         }
       )
@@ -146,15 +164,23 @@ export default function BillingPage() {
   }
 
   const handleReactivateSubscription = async () => {
-    if (!user?.access_token || !subscription) return
+    if (!user || !subscription) return
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token
+      
+      if (!accessToken) {
+        setError('Authentication required')
+        return
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/billing/subscription/reactivate`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${user.access_token}`
+            'Authorization': `Bearer ${accessToken}`
           }
         }
       )
@@ -171,15 +197,23 @@ export default function BillingPage() {
   }
 
   const handleManageBilling = async () => {
-    if (!user?.access_token) return
+    if (!user) return
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token
+      
+      if (!accessToken) {
+        setError('Authentication required')
+        return
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/billing/portal`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${user.access_token}`
+            'Authorization': `Bearer ${accessToken}`
           }
         }
       )
@@ -304,7 +338,7 @@ export default function BillingPage() {
             ) : (
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Free Plan</h3>
-                <p className="text-gray-600 mb-6">You're currently on the free plan.</p>
+                <p className="text-gray-600 mb-6">You&apos;re currently on the free plan.</p>
                 <a href="/pricing" className="btn-primary">
                   Upgrade Plan
                 </a>
