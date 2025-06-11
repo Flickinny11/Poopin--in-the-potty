@@ -14,7 +14,8 @@ import {
   GlobeIcon,
   TrendingUpIcon,
   MenuIcon,
-  XIcon
+  XIcon,
+  CalendarIcon
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -92,10 +93,10 @@ export default function DashboardPage() {
       color: 'bg-green-500'
     },
     {
-      title: 'Voice Training',
-      description: 'Upload samples to improve voice cloning accuracy',
-      icon: PlusIcon,
-      action: () => alert('Voice training feature coming soon!'),
+      title: 'Schedule Call',
+      description: 'Plan a video call and send calendar invitations',
+      icon: CalendarIcon,
+      action: () => router.push('/call/schedule'),
       color: 'bg-purple-500'
     }
   ]
@@ -147,9 +148,13 @@ export default function DashboardPage() {
               <VideoIcon className="mr-3 h-5 w-5" />
               Dashboard
             </a>
-            <a href="#" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
-              <UsersIcon className="mr-3 h-5 w-5" />
+            <a href="/call/history" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
+              <ClockIcon className="mr-3 h-5 w-5" />
               Call History
+            </a>
+            <a href="/call/schedule" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
+              <CalendarIcon className="mr-3 h-5 w-5" />
+              Schedule Call
             </a>
             <a href="#" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
               <SettingsIcon className="mr-3 h-5 w-5" />

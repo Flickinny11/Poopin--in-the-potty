@@ -5,6 +5,8 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useCallStore } from '@/stores/callStore';
+import KeyboardShortcutsModal from './KeyboardShortcutsModal';
+import { useCallQualityMonitor } from '@/hooks/useCallQualityMonitor';
 import { 
   MicIcon, 
   MicOffIcon, 
@@ -66,7 +68,11 @@ export default function VideoCallInterface({
 
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const [isControlsVisible, setIsControlsVisible] = useState(true);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Monitor call quality
+  useCallQualityMonitor();
 
   // Auto-hide controls after 3 seconds of inactivity
   const resetControlsTimeout = useCallback(() => {
@@ -106,11 +112,22 @@ export default function VideoCallInterface({
         toggleScreenShare();
       } else if (isMod && e.key === 'k') {
         e.preventDefault();
-        // Show keyboard shortcuts modal (implement later)
+        setShowShortcuts(true);
       } else if (e.key === 'Escape') {
-        if (isFullscreen) {
+        if (showShortcuts) {
+          setShowShortcuts(false);
+        } else if (isFullscreen) {
           setFullscreen(false);
         }
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        setShowParticipants(!showParticipants);
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        setShowChat(!showChat);
+      } else if (e.key === '?') {
+        e.preventDefault();
+        setShowShortcuts(true);
       } else if (e.key === ' ' && !localAudio) {
         e.preventDefault();
         // Push to talk (implement later)
@@ -119,7 +136,7 @@ export default function VideoCallInterface({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [localAudio, localVideo, isFullscreen, toggleAudio, toggleVideo, toggleScreenShare, setFullscreen]);
+  }, [localAudio, localVideo, isFullscreen, showParticipants, showChat, showShortcuts, toggleAudio, toggleVideo, toggleScreenShare, setFullscreen, setShowParticipants, setShowChat]);
 
   // Mouse movement handler for auto-hiding controls
   useEffect(() => {
@@ -324,6 +341,16 @@ export default function VideoCallInterface({
               <MessageSquareIcon size={24} className="text-white" />
             </button>
 
+            {/* Help / Shortcuts */}
+            <button
+              onClick={() => setShowShortcuts(true)}
+              className="p-4 rounded-full bg-gray-600 hover:bg-gray-500 transition-colors"
+              title="Show keyboard shortcuts (Cmd/Ctrl+K)"
+              aria-label="Show keyboard shortcuts"
+            >
+              <SettingsIcon size={24} className="text-white" />
+            </button>
+
             {/* Fullscreen */}
             <button
               onClick={() => setFullscreen(!isFullscreen)}
@@ -393,6 +420,12 @@ export default function VideoCallInterface({
           </div>
         </div>
       )}
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={showShortcuts}
+        onClose={() => setShowShortcuts(false)}
+      />
     </div>
   );
 }
