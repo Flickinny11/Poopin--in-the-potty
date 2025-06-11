@@ -15,7 +15,9 @@ import {
   TrendingUpIcon,
   MenuIcon,
   XIcon,
-  CalendarIcon
+  CalendarIcon,
+  CreditCardIcon,
+  ShieldCheckIcon
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -155,6 +157,14 @@ export default function DashboardPage() {
             <a href="/call/schedule" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
               <CalendarIcon className="mr-3 h-5 w-5" />
               Schedule Call
+            </a>
+            <a href="/dashboard/billing" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
+              <CreditCardIcon className="mr-3 h-5 w-5" />
+              Billing
+            </a>
+            <a href="/dashboard/privacy" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
+              <ShieldCheckIcon className="mr-3 h-5 w-5" />
+              Privacy
             </a>
             <a href="#" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
               <SettingsIcon className="mr-3 h-5 w-5" />
