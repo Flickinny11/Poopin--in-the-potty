@@ -19,7 +19,7 @@ class SubscriptionTier(enum.Enum):
     FREE = "free"
     BASIC = "basic"
     PRO = "pro"
-    ENTERPRISE = "enterprise"
+    BUSINESS = "business"
 
 class CallStatus(enum.Enum):
     ACTIVE = "active"
@@ -112,6 +112,8 @@ class Subscription(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     stripe_subscription_id = Column(String(255), unique=True, index=True)
+    stripe_customer_id = Column(String(255), index=True)
+    stripe_price_id = Column(String(255))
     tier = Column(SQLEnum(SubscriptionTier), nullable=False)
     status = Column(SQLEnum(SubscriptionStatus), nullable=False, index=True)
     current_period_start = Column(DateTime(timezone=True))
@@ -128,6 +130,7 @@ class Subscription(Base):
     # Indexes
     __table_args__ = (
         Index('idx_subscriptions_status_active', 'status', postgresql_where=status == SubscriptionStatus.ACTIVE),
+        Index('idx_subscriptions_customer', 'stripe_customer_id'),
     )
 
 class UsageLog(Base):
@@ -187,4 +190,23 @@ class UserSetting(Base):
     # Unique constraint on user_id + setting_key
     __table_args__ = (
         Index('idx_user_settings_user_key', 'user_id', 'setting_key', unique=True),
+    )
+
+class WebhookEvent(Base):
+    __tablename__ = "webhook_events"
+    
+    id = Column(String(255), primary_key=True)  # Stripe event ID
+    event_type = Column(String(100), nullable=False, index=True)
+    processed_at = Column(DateTime(timezone=True))
+    status = Column(String(50), default="processing", index=True)  # processing, success, failed
+    retry_count = Column(Integer, default=0)
+    error_message = Column(Text)
+    event_data = Column(JSON)  # Store the full event data
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+    # Indexes
+    __table_args__ = (
+        Index('idx_webhook_events_type_status', 'event_type', 'status'),
+        Index('idx_webhook_events_created', 'created_at'),
     )

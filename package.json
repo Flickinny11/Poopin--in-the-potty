@@ -13,6 +13,8 @@
   "license": "ISC",
   "description": "VidLiSync - Real-time video chat with AI translation",
   "dependencies": {
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^7.3.1",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.0",
     "@tailwindcss/typography": "^0.5.16",

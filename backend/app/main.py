@@ -9,7 +9,7 @@ import logging
 import os
 from typing import Dict, Any
 
-from .routers import auth, users, calls, settings, contacts, health
+from .routers import auth, users, calls, settings, contacts, health, billing, webhooks
 from .database import database
 from .middleware.auth import get_current_user
 
@@ -46,6 +46,8 @@ app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(calls.router, prefix="/calls", tags=["calls"])
 app.include_router(settings.router, prefix="/settings", tags=["settings"])
 app.include_router(contacts.router, prefix="/contacts", tags=["contacts"])
+app.include_router(billing.router, prefix="/billing", tags=["billing"])
+app.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
 
 @app.on_event("startup")
 async def startup_event():

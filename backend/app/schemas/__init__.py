@@ -12,7 +12,7 @@ class SubscriptionTier(str, Enum):
     FREE = "free"
     BASIC = "basic"
     PRO = "pro"
-    ENTERPRISE = "enterprise"
+    BUSINESS = "business"
 
 class CallStatus(str, Enum):
     ACTIVE = "active"
@@ -228,3 +228,43 @@ class HealthResponse(BaseSchema):
     timestamp: datetime
     database: str = "connected"
     version: str = "1.0.0"
+
+# Billing and Stripe Schemas
+class CheckoutSessionCreate(BaseSchema):
+    price_id: str = Field(..., description="Stripe price ID")
+    success_url: str = Field(..., description="URL to redirect on success")
+    cancel_url: str = Field(..., description="URL to redirect on cancel")
+
+class CheckoutSessionResponse(BaseSchema):
+    session_id: str
+    url: str
+
+class WebhookEventResponse(BaseSchema):
+    id: str
+    event_type: str
+    status: str
+    processed_at: Optional[datetime]
+    retry_count: int
+    error_message: Optional[str]
+    created_at: datetime
+
+class SubscriptionPlanResponse(BaseSchema):
+    tier: SubscriptionTier
+    name: str
+    price: float
+    currency: str = "usd"
+    interval: str = "month"
+    features: List[str]
+    limits: Dict[str, Any]
+
+class UsageStatsResponse(BaseSchema):
+    current_period_start: datetime
+    current_period_end: datetime
+    total_minutes_used: int
+    minutes_limit: int
+    overage_minutes: int = 0
+    calls_count: int
+    features_used: Dict[str, int]
+
+class CustomerPortalResponse(BaseSchema):
+    url: str
