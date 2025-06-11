@@ -162,7 +162,7 @@ def require_subscription_tier(required_tier: str):
             "free": 0,
             "basic": 1,
             "pro": 2,
-            "enterprise": 3
+            "business": 3
         }
         
         if tier_hierarchy.get(user_tier, 0) < tier_hierarchy.get(required_tier, 0):
@@ -171,6 +171,100 @@ def require_subscription_tier(required_tier: str):
                 detail=f"This feature requires {required_tier} subscription or higher"
             )
         
+        return current_user
+    
+    return dependency
+
+async def check_usage_limits(current_user: dict, feature: str, usage_amount: int = 1):
+    """
+    Check if user has enough quota for the requested feature usage
+    """
+    from ..database import db_manager
+    from datetime import datetime, timezone
+    
+    user_id = current_user.get("id")
+    user_tier = current_user.get("subscription_tier", "free")
+    
+    # Define limits per tier
+    tier_limits = {
+        "free": {
+            "minutes_per_month": 5,
+            "max_participants": 2,
+            "languages": 5,
+            "calls_per_day": 3
+        },
+        "basic": {
+            "minutes_per_month": 60,
+            "max_participants": 2,
+            "languages": 15,
+            "calls_per_day": 20
+        },
+        "pro": {
+            "minutes_per_month": 300,
+            "max_participants": 10,
+            "languages": 50,
+            "calls_per_day": 100
+        },
+        "business": {
+            "minutes_per_month": -1,  # Unlimited
+            "max_participants": 100,
+            "languages": 50,
+            "calls_per_day": -1  # Unlimited
+        }
+    }
+    
+    limits = tier_limits.get(user_tier, tier_limits["free"])
+    
+    # Get current subscription period
+    subscription = await db_manager.get_user_subscription(user_id)
+    period_start = subscription.get('current_period_start') if subscription else None
+    period_end = subscription.get('current_period_end') if subscription else None
+    
+    # Get usage stats
+    usage_stats = await db_manager.get_user_usage_stats(user_id, period_start, period_end)
+    
+    # Check specific feature limits
+    if feature == "call_minutes":
+        monthly_limit = limits["minutes_per_month"]
+        if monthly_limit > 0:  # -1 means unlimited
+            current_usage = usage_stats.get("total_minutes", 0)
+            if current_usage + usage_amount > monthly_limit:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Monthly minutes limit exceeded. Current: {current_usage}, Limit: {monthly_limit}"
+                )
+    
+    elif feature == "participants":
+        max_participants = limits["max_participants"]
+        if usage_amount > max_participants:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Participant limit exceeded. Max allowed: {max_participants}"
+            )
+    
+    elif feature == "daily_calls":
+        daily_limit = limits["calls_per_day"]
+        if daily_limit > 0:  # -1 means unlimited
+            today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+            today_end = today_start.replace(hour=23, minute=59, second=59, microsecond=999999)
+            
+            today_usage = await db_manager.get_user_usage_stats(user_id, today_start, today_end)
+            current_calls = today_usage.get("calls_count", 0)
+            
+            if current_calls + usage_amount > daily_limit:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Daily calls limit exceeded. Current: {current_calls}, Limit: {daily_limit}"
+                )
+    
+    return True
+
+def require_usage_limit(feature: str, usage_amount: int = 1):
+    """
+    Decorator to check usage limits before allowing feature access
+    """
+    async def dependency(current_user: dict = Depends(get_current_active_user)) -> dict:
+        await check_usage_limits(current_user, feature, usage_amount)
         return current_user
     
     return dependency
