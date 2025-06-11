@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
 import { NotificationToasts } from '@/components/NotificationCenter'
+import TutorialModal, { TutorialTrigger } from '@/components/TutorialModal'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -80,6 +81,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <ServiceWorkerRegistration />
         <NotificationToasts />
+        <TutorialModal />
+        <TutorialTrigger />
         {children}
       </body>
     </html>

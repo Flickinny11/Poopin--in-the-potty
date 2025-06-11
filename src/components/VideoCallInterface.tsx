@@ -9,6 +9,7 @@ import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import TranslationControls from './TranslationControls';
 import TranslationOverlay from './TranslationOverlay';
 import { TranslationErrorBoundary } from './TranslationErrorBoundary';
+import PerformanceMonitor from './PerformanceMonitor';
 import { useCallQualityMonitor } from '@/hooks/useCallQualityMonitor';
 import { 
   MicIcon, 
@@ -73,6 +74,7 @@ export default function VideoCallInterface({
   const [isControlsVisible, setIsControlsVisible] = useState(true);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showTranslationPanel, setShowTranslationPanel] = useState(false);
+  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Monitor call quality
@@ -132,6 +134,9 @@ export default function VideoCallInterface({
       } else if (e.key === 't' || e.key === 'T') {
         e.preventDefault();
         setShowTranslationPanel(!showTranslationPanel);
+      } else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        setShowPerformanceMonitor(!showPerformanceMonitor);
       } else if (e.key === '?') {
         e.preventDefault();
         setShowShortcuts(true);
@@ -143,7 +148,7 @@ export default function VideoCallInterface({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [localAudio, localVideo, isFullscreen, showParticipants, showChat, showTranslationPanel, showShortcuts, toggleAudio, toggleVideo, toggleScreenShare, setFullscreen, setShowParticipants, setShowChat]);
+  }, [localAudio, localVideo, isFullscreen, showParticipants, showChat, showTranslationPanel, showPerformanceMonitor, showShortcuts, toggleAudio, toggleVideo, toggleScreenShare, setFullscreen, setShowParticipants, setShowChat]);
 
   // Mouse movement handler for auto-hiding controls
   useEffect(() => {
@@ -223,7 +228,7 @@ export default function VideoCallInterface({
       </TranslationErrorBoundary>
 
       {/* Network quality indicator */}
-      <div className="absolute top-4 left-4 z-20">
+      <div className="absolute top-4 left-4 z-20 flex items-center space-x-2">
         <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium ${
           networkQuality === 'good' ? 'bg-green-500 text-white' :
           networkQuality === 'warning' ? 'bg-yellow-500 text-black' :
@@ -234,6 +239,15 @@ export default function VideoCallInterface({
             {networkQuality === 'good' ? 'HD' :
              networkQuality === 'warning' ? 'Good' : 'Poor'}
           </span>
+        </div>
+        
+        {/* Compact Performance Monitor */}
+        <div 
+          className="bg-black bg-opacity-50 rounded-lg px-3 py-2 cursor-pointer hover:bg-opacity-70 transition-all duration-200"
+          onClick={() => setShowPerformanceMonitor(!showPerformanceMonitor)}
+          title="Performance Monitor (M)"
+        >
+          <PerformanceMonitor compact={true} className="text-white" />
         </div>
       </div>
 
@@ -438,6 +452,18 @@ export default function VideoCallInterface({
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Performance Monitor */}
+      {showPerformanceMonitor && (
+        <div className="absolute top-0 left-0 w-80 bg-white shadow-lg z-40 rounded-br-lg">
+          <div className="p-4">
+            <PerformanceMonitor 
+              onClose={() => setShowPerformanceMonitor(false)}
+              compact={false}
+            />
           </div>
         </div>
       )}
