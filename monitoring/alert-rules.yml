@@ -1,0 +1,188 @@
+# VidLiSync Production Alert Rules
+# Prometheus alerting rules for critical production monitoring
+
+groups:
+  - name: vidlisync.production.alerts
+    rules:
+      # Service Availability Alerts
+      - alert: VidLiSyncServiceDown
+        expr: up{job=~"vidlisync-.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "VidLiSync service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute"
+          runbook_url: "https://wiki.vidlisync.com/runbooks/service-down"
+
+      # High Error Rate Alerts
+      - alert: VidLiSyncHighErrorRate
+        expr: (rate(http_requests_total{job=~"vidlisync-.*",status=~"5.."}[5m]) / rate(http_requests_total{job=~"vidlisync-.*"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "Error rate is {{ $value | humanizePercentage }} for service {{ $labels.job }}"
+
+      # Response Time Alerts
+      - alert: VidLiSyncHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="vidlisync-backend"}[5m])) > 2
+        for: 10m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "High latency on VidLiSync backend"
+          description: "95th percentile latency is {{ $value }}s"
+
+      # Database Alerts
+      - alert: VidLiSyncDatabaseConnections
+        expr: postgresql_database_numbackends{database="vidlisync"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High number of database connections"
+          description: "Database has {{ $value }} active connections"
+
+      - alert: VidLiSyncDatabaseSize
+        expr: postgresql_database_size_bytes{database="vidlisync"} > 50000000000 # 50GB
+        for: 1h
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "VidLiSync database size is growing large"
+          description: "Database size is {{ $value | humanizeBytes }}"
+
+      # AI Service Alerts
+      - alert: VidLiSyncAIServiceDown
+        expr: up{job="vidlisync-ai"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: ai
+        annotations:
+          summary: "AI translation service is down"
+          description: "AI service has been unavailable for more than 2 minutes"
+
+      - alert: VidLiSyncGPUUtilization
+        expr: nvidia_gpu_utilization_percentage > 90
+        for: 15m
+        labels:
+          severity: warning
+          service: ai
+        annotations:
+          summary: "High GPU utilization"
+          description: "GPU utilization is {{ $value }}% for more than 15 minutes"
+
+      # Resource Usage Alerts
+      - alert: VidLiSyncHighCPU
+        expr: rate(container_cpu_usage_seconds_total{container=~"vidlisync.*"}[5m]) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: "{{ $labels.container }}"
+        annotations:
+          summary: "High CPU usage on {{ $labels.container }}"
+          description: "CPU usage is {{ $value }}% for more than 10 minutes"
+
+      - alert: VidLiSyncHighMemory
+        expr: (container_memory_usage_bytes{container=~"vidlisync.*"} / container_spec_memory_limit_bytes) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: "{{ $labels.container }}"
+        annotations:
+          summary: "High memory usage on {{ $labels.container }}"
+          description: "Memory usage is {{ $value }}% for more than 10 minutes"
+
+      # Business Metrics Alerts
+      - alert: VidLiSyncLowActiveUsers
+        expr: vidlisync_active_users_total < 10
+        for: 30m
+        labels:
+          severity: warning
+          type: business
+        annotations:
+          summary: "Low number of active users"
+          description: "Only {{ $value }} active users in the last 30 minutes"
+
+      - alert: VidLiSyncPaymentFailures
+        expr: increase(stripe_failed_payments_total[1h]) > 5
+        for: 1m
+        labels:
+          severity: critical
+          type: business
+        annotations:
+          summary: "High payment failure rate"
+          description: "{{ $value }} payment failures in the last hour"
+
+      # Security Alerts
+      - alert: VidLiSyncSuspiciousActivity
+        expr: rate(http_requests_total{job="vidlisync-backend",status="401"}[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          type: security
+        annotations:
+          summary: "High number of unauthorized requests"
+          description: "{{ $value }} unauthorized requests per second"
+
+      - alert: VidLiSyncDDoSDetection
+        expr: rate(http_requests_total{job=~"vidlisync-.*"}[1m]) > 1000
+        for: 2m
+        labels:
+          severity: critical
+          type: security
+        annotations:
+          summary: "Possible DDoS attack detected"
+          description: "{{ $value }} requests per second - possible DDoS attack"
+
+      # Webhook Alerts
+      - alert: VidLiSyncWebhookFailures
+        expr: increase(webhook_failures_total[30m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+          service: webhooks
+        annotations:
+          summary: "High webhook failure rate"
+          description: "{{ $value }} webhook failures in the last 30 minutes"
+
+      # Certificate Expiry Alerts
+      - alert: VidLiSyncSSLCertificateExpiry
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 7 # 7 days
+        for: 1h
+        labels:
+          severity: warning
+          type: security
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate expires in {{ $value | humanizeDuration }}"
+
+      # Storage Alerts
+      - alert: VidLiSyncDiskSpaceUsage
+        expr: (node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_free_bytes{mountpoint="/"}) / node_filesystem_size_bytes{mountpoint="/"} * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          type: infrastructure
+        annotations:
+          summary: "High disk space usage"
+          description: "Disk usage is {{ $value }}% on root filesystem"
+
+      # Network Alerts
+      - alert: VidLiSyncHighNetworkTraffic
+        expr: rate(node_network_receive_bytes_total[5m]) > 100000000 # 100MB/s
+        for: 10m
+        labels:
+          severity: warning
+          type: network
+        annotations:
+          summary: "High network traffic"
+          description: "Network receive rate is {{ $value | humanizeBytes }}/s"

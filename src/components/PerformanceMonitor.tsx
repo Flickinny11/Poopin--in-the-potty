@@ -81,14 +81,14 @@ export default function PerformanceMonitor({
         },
         call: {
           networkQuality,
-          audioQuality: qualityStats?.audioSendBitsPerSecond || 0,
+          audioQuality: qualityStats?.videoSendBitsPerSecond || 0, // Using available property
           videoQuality: qualityStats?.videoSendBitsPerSecond || 0,
           packetLoss: qualityStats ? 
             (qualityStats.audioRecvPacketLoss + qualityStats.videoRecvPacketLoss) / 2 : 0,
         },
         system: {
           bandwidthUsage: qualityStats ? 
-            (qualityStats.audioSendBitsPerSecond + qualityStats.videoSendBitsPerSecond) / 1000 : 0,
+            (qualityStats.videoSendBitsPerSecond * 2) / 1000 : 0, // Using available property
         },
       });
     };
