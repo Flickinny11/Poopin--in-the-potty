@@ -14,7 +14,8 @@ import {
   GlobeIcon,
   TrendingUpIcon,
   MenuIcon,
-  XIcon
+  XIcon,
+  CalendarIcon
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -79,23 +80,23 @@ export default function DashboardPage() {
   const quickActions = [
     {
       title: 'Start Video Call',
-      description: 'Begin an instant video call with AI translation',
+      description: 'Begin an instant HD video call with professional quality',
       icon: VideoIcon,
-      action: () => alert('Video calling feature coming soon!'),
+      action: () => router.push('/call/new'),
       color: 'bg-blue-500'
     },
     {
       title: 'Join Call',
       description: 'Enter a call ID to join an existing conversation',
       icon: UsersIcon,
-      action: () => alert('Join call feature coming soon!'),
+      action: () => router.push('/call'),
       color: 'bg-green-500'
     },
     {
-      title: 'Voice Training',
-      description: 'Upload samples to improve voice cloning accuracy',
-      icon: PlusIcon,
-      action: () => alert('Voice training feature coming soon!'),
+      title: 'Schedule Call',
+      description: 'Plan a video call and send calendar invitations',
+      icon: CalendarIcon,
+      action: () => router.push('/call/schedule'),
       color: 'bg-purple-500'
     }
   ]
@@ -147,9 +148,13 @@ export default function DashboardPage() {
               <VideoIcon className="mr-3 h-5 w-5" />
               Dashboard
             </a>
-            <a href="#" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
-              <UsersIcon className="mr-3 h-5 w-5" />
+            <a href="/call/history" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
+              <ClockIcon className="mr-3 h-5 w-5" />
               Call History
+            </a>
+            <a href="/call/schedule" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
+              <CalendarIcon className="mr-3 h-5 w-5" />
+              Schedule Call
             </a>
             <a href="#" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
               <SettingsIcon className="mr-3 h-5 w-5" />
@@ -254,13 +259,13 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                    <span className="text-gray-600 text-sm font-bold">3</span>
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">3</span>
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-sm font-medium text-gray-900">Start your first call (Coming Soon)</h3>
-                  <p className="text-sm text-gray-600">Experience real-time translation in action.</p>
+                  <h3 className="text-sm font-medium text-gray-900">Start your first call</h3>
+                  <p className="text-sm text-gray-600">Create an HD video call and experience professional-quality video calling.</p>
                 </div>
               </div>
             </div>
