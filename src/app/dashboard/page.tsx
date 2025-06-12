@@ -17,7 +17,8 @@ import {
   XIcon,
   CalendarIcon,
   CreditCardIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  PresentationIcon
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -81,6 +82,13 @@ export default function DashboardPage() {
 
   const quickActions = [
     {
+      title: 'VS Presenter',
+      description: 'Start a multi-language presentation with real-time translation',
+      icon: PresentationIcon,
+      action: () => router.push('/presenter'),
+      color: 'bg-purple-600'
+    },
+    {
       title: 'Start Video Call',
       description: 'Begin an instant HD video call with professional quality',
       icon: VideoIcon,
@@ -99,7 +107,7 @@ export default function DashboardPage() {
       description: 'Plan a video call and send calendar invitations',
       icon: CalendarIcon,
       action: () => router.push('/call/schedule'),
-      color: 'bg-purple-500'
+      color: 'bg-orange-500'
     }
   ]
 
@@ -149,6 +157,10 @@ export default function DashboardPage() {
             <a href="/dashboard" className="bg-blue-50 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
               <VideoIcon className="mr-3 h-5 w-5" />
               Dashboard
+            </a>
+            <a href="/presenter" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
+              <PresentationIcon className="mr-3 h-5 w-5" />
+              VS Presenter
             </a>
             <a href="/call/history" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
               <ClockIcon className="mr-3 h-5 w-5" />
