@@ -25,6 +25,13 @@ VERIFY_CHECKSUMS = True
 MAX_CONCURRENT_STREAMS = int(os.getenv("MAX_CONCURRENT_STREAMS", "100"))
 AUDIO_CHUNK_SIZE_MS = int(os.getenv("AUDIO_CHUNK_SIZE_MS", "100"))
 
+# Local AI Model Configuration
+FORCE_LOCAL_PROCESSING = os.getenv("FORCE_LOCAL_PROCESSING", "true").lower() == "true"
+WHISPER_MODEL_NAME = "openai/whisper-large-v3"
+NLLB_MODEL_NAME = "facebook/nllb-200-distilled-600M"
+DEVICE = "cuda" if os.getenv("CUDA_VISIBLE_DEVICES") else "cpu"
+MODEL_PRECISION = "float16" if DEVICE == "cuda" else "float32"
+
 # Performance Configuration
 LATENCY_TARGET_MS = 400
 GPU_MEMORY_LIMIT = os.getenv("PYTORCH_CUDA_ALLOC_CONF", "max_split_size_mb:512")
