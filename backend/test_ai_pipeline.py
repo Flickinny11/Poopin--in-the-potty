@@ -156,10 +156,10 @@ async def test_individual_services():
     transcription = await whisper.transcribe_audio(test_audio, language="en")
     logger.info(f"Whisper transcription: {transcription['text']}")
     
-    # Test Google Translate service
-    from app.ai_services.translate_service import GoogleTranslateService
+    # Test NLLB Translate service
+    from app.ai_services.translate_service import NLLBTranslateService
     
-    translator = GoogleTranslateService()
+    translator = NLLBTranslateService()
     await translator.initialize()
     
     translation = await translator.translate_text("Hello world", "es")

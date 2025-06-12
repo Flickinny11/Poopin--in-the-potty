@@ -11,7 +11,7 @@ from datetime import datetime
 
 from .wunjo_service import WunjoCEService
 from .whisper_service import WhisperService
-from .translate_service import GoogleTranslateService
+from .translate_service import NLLBTranslateService
 from .config import (
     LATENCY_TARGET_MS, MAX_CONCURRENT_STREAMS, TRANSLATION_ACCURACY_THRESHOLD,
     VOICE_QUALITY_THRESHOLD, LIP_SYNC_QUALITY_THRESHOLD
@@ -25,7 +25,7 @@ class TranslationPipeline:
     def __init__(self):
         self.wunjo_service = WunjoCEService()
         self.whisper_service = WhisperService()
-        self.translate_service = GoogleTranslateService()
+        self.translate_service = NLLBTranslateService()
         
         self.is_initialized = False
         self.active_streams = {}
