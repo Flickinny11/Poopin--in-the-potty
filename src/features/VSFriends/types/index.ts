@@ -48,6 +48,22 @@ export interface AudioStream {
   language: string;
 }
 
+export interface TranslationRequest {
+  audioData: Uint8Array;
+  sourceLanguage: string;
+  targetLanguage: string;
+  participantId: string;
+  useVoiceCloning: boolean;
+}
+
+export interface TranslationResult {
+  originalText: string;
+  translatedText: string;
+  synthesizedAudio: Uint8Array;
+  confidence: number;
+  processingTime: number;
+}
+
 export interface VSFriendsBilling {
   initiatorId: string;
   conversationId: string;
