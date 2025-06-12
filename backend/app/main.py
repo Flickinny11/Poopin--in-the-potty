@@ -9,7 +9,7 @@ import logging
 import os
 from typing import Dict, Any
 
-from .routers import auth, users, calls, settings, contacts, health, billing, webhooks, translation
+from .routers import auth, users, calls, settings, contacts, health, billing, webhooks, translation, vs_environment
 from .database import database
 from .middleware.auth import get_current_user
 from .ai_services.websocket_handler import TranslationWebSocketHandler
@@ -55,6 +55,7 @@ app.include_router(contacts.router, prefix="/contacts", tags=["contacts"])
 app.include_router(billing.router, prefix="/billing", tags=["billing"])
 app.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
 app.include_router(translation.router, prefix="/translation", tags=["ai-translation"])
+app.include_router(vs_environment.router, prefix="/api", tags=["vs-environment"])
 
 @app.on_event("startup")
 async def startup_event():
@@ -96,7 +97,8 @@ async def root():
             "ai_translation": True,
             "voice_cloning": True,
             "lip_sync": True,
-            "websocket_streaming": True
+            "websocket_streaming": True,
+            "vs_environment": True
         }
     }
 
