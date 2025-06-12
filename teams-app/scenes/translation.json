@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "scenes": [
+    {
+      "id": "translation-panel",
+      "name": "VidLiSync Translation",
+      "file": "translation-scene.html",
+      "preview": "../assets/preview.png",
+      "audioMixerLayout": "speaker",
+      "defaultSurfaceSize": {
+        "width": 1920,
+        "height": 1080
+      }
+    }
+  ]
+}

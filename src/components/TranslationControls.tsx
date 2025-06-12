@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useTranslationStore } from '@/stores/translationStore';
 import { useTranslationWebSocket } from '@/hooks/useTranslationWebSocket';
+import { useIntegrationTranslation } from '@/hooks/useIntegrationTranslation';
 
 interface TranslationControlsProps {
   className?: string;
@@ -51,6 +52,15 @@ export default function TranslationControls({ className = '', compact = false, o
   } = useTranslationStore();
   
   const { isConnected, startTranslation, stopTranslation, connect } = useTranslationWebSocket();
+  const {
+    isIntegrationMode,
+    platform,
+    bridgeReady,
+    audioCapturing,
+    integrationError,
+    startIntegrationTranslation,
+    stopIntegrationTranslation,
+  } = useIntegrationTranslation();
 
   const getLanguageName = (code: string) => {
     const lang = availableLanguages.find(l => l.code === code);
@@ -60,13 +70,22 @@ export default function TranslationControls({ className = '', compact = false, o
   const handleToggleTranslation = async () => {
     try {
       if (isTranslationActive) {
-        stopTranslation();
+        if (isIntegrationMode) {
+          await stopIntegrationTranslation();
+        } else {
+          stopTranslation();
+        }
       } else {
-        if (!isConnected) {
+        if (!isConnected && !isIntegrationMode) {
           // Connect first if not connected
           await connect();
         }
-        await startTranslation(sourceLanguage, targetLanguage);
+        
+        if (isIntegrationMode) {
+          await startIntegrationTranslation();
+        } else {
+          await startTranslation(sourceLanguage, targetLanguage);
+        }
       }
     } catch (error) {
       console.error('Failed to toggle translation:', error);
@@ -106,7 +125,7 @@ export default function TranslationControls({ className = '', compact = false, o
         {/* Translation Toggle */}
         <button
           onClick={handleToggleTranslation}
-          disabled={!isConnected && !isTranslationActive}
+          disabled={(!isConnected && !isIntegrationMode && !isTranslationActive) || (isIntegrationMode && !bridgeReady && !isTranslationActive)}
           className={`
             flex items-center justify-center w-10 h-10 rounded-full
             ${isTranslationActive 
@@ -114,7 +133,7 @@ export default function TranslationControls({ className = '', compact = false, o
               : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }
             transition-colors duration-200
-            ${(!isConnected && !isTranslationActive) ? 'opacity-50 cursor-not-allowed' : ''}
+            ${((!isConnected && !isIntegrationMode && !isTranslationActive) || (isIntegrationMode && !bridgeReady && !isTranslationActive)) ? 'opacity-50 cursor-not-allowed' : ''}
           `}
           title={isTranslationActive ? 'Stop Translation' : 'Start Translation'}
         >
@@ -150,10 +169,21 @@ export default function TranslationControls({ className = '', compact = false, o
         <h3 className="text-lg font-semibold text-white flex items-center">
           <LanguagesIcon className="w-5 h-5 mr-2" />
           Translation
+          {isIntegrationMode && (
+            <span className="ml-2 text-xs bg-blue-600 text-white px-2 py-1 rounded-full capitalize">
+              {platform}
+            </span>
+          )}
         </h3>
         
         {/* Quality Indicators */}
         <div className="flex items-center space-x-3 text-sm">
+          {integrationError && (
+            <div className="flex items-center space-x-1 text-red-400">
+              <div className="w-2 h-2 rounded-full bg-red-400" />
+              <span>Integration Error</span>
+            </div>
+          )}
           <div className="flex items-center space-x-1">
             <div className={`w-2 h-2 rounded-full ${getQualityColor(translationQuality)}`} />
             <span className="text-gray-400">Quality: {translationQuality}</span>
@@ -213,14 +243,14 @@ export default function TranslationControls({ className = '', compact = false, o
         {/* Translation Toggle */}
         <button
           onClick={handleToggleTranslation}
-          disabled={!isConnected && !isTranslationActive}
+          disabled={(!isConnected && !isIntegrationMode && !isTranslationActive) || (isIntegrationMode && !bridgeReady && !isTranslationActive)}
           className={`
             flex items-center px-4 py-2 rounded-lg font-medium transition-colors duration-200
             ${isTranslationActive 
               ? 'bg-red-500 hover:bg-red-600 text-white' 
               : 'bg-blue-500 hover:bg-blue-600 text-white'
             }
-            ${(!isConnected && !isTranslationActive) ? 'opacity-50 cursor-not-allowed' : ''}
+            ${((!isConnected && !isIntegrationMode && !isTranslationActive) || (isIntegrationMode && !bridgeReady && !isTranslationActive)) ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
           {isTranslationActive ? (
