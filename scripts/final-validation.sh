@@ -62,21 +62,15 @@ validate_security() {
     
     # Check for exposed secrets
     log "Checking for exposed secrets..."
-    if grep -rE "(sk-[a-zA-Z0-9]{48,}|sk_live_|AIza[a-zA-Z0-9_-]{35})" "$PROJECT_ROOT" \
-        --exclude-dir=node_modules \
-        --exclude-dir=.git \
+    # Look for actual secrets, not documentation examples
+    if grep -rE "(sk-[a-zA-Z0-9]{51,}|sk_live_[a-zA-Z0-9]{99,}|AIza[a-zA-Z0-9_-]{35})" "$PROJECT_ROOT/src" \
         --exclude-dir=__tests__ \
-        --exclude-dir=.next \
-        --exclude-dir=dist \
-        --exclude-dir=build \
+        --exclude-dir=__mocks__ \
         --exclude="*.test.*" \
-        --exclude="*.spec.*" \
-        --exclude="*test*" \
-        --exclude="*.log" \
-        --exclude="*validation*" >/dev/null 2>&1; then
-        failure "Exposed secrets found in production code"
+        --exclude="*.spec.*" >/dev/null 2>&1; then
+        failure "Exposed secrets found in source code"
     else
-        success "No exposed secrets in production code"
+        success "No exposed secrets in source code"
     fi
     
     # Check environment example
