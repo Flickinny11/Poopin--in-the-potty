@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { supabase } from '@/lib/supabase'
@@ -54,7 +54,16 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchBillingData = useCallback(async () => {
+  useEffect(() => {
+    if (!user) {
+      router.push('/auth/login')
+      return
+    }
+    
+    fetchBillingData()
+  }, [user, router]) // Removing fetchBillingData from deps as it's defined inside component
+
+  const fetchBillingData = async () => {
     if (!user) return
 
     try {
@@ -115,16 +124,7 @@ export default function BillingPage() {
     } finally {
       setLoading(false)
     }
-  }, [user])
-
-  useEffect(() => {
-    if (!user) {
-      router.push('/auth/login')
-      return
-    }
-    
-    fetchBillingData()
-  }, [user, router, fetchBillingData])
+  }
 
   const handleCancelSubscription = async () => {
     if (!user || !subscription) return
