@@ -150,9 +150,8 @@ class NLLBTranslateService:
             if self.device != "cpu":
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
             
-            # Set target language for generation
-            self.tokenizer.src_lang = source_lang
-            forced_bos_token_id = self.tokenizer.lang_code_to_id[target_lang]
+            # Set target language for generation  
+            forced_bos_token_id = self.tokenizer.convert_tokens_to_ids(target_lang)
             
             # Generate translation
             with torch.no_grad():
