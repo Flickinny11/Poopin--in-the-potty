@@ -1,0 +1,47 @@
+{
+  "name": "VidLiSync Translator",
+  "description": "Real-time translation with voice cloning and lip sync for Zoom meetings",
+  "version": "1.0.0",
+  "short_description": "AI-powered real-time translation with voice preservation",
+  "long_description": "VidLiSync provides seamless real-time speech-to-speech translation during Zoom meetings. Using advanced AI, it preserves your unique voice characteristics while translating between 50+ languages with natural lip synchronization.",
+  "app_type": "meeting",
+  "redirect_url": "https://vidlisync.com/zoom/callback",
+  "home_url": "https://vidlisync.com",
+  "support_url": "https://vidlisync.com/support",
+  "privacy_policy_url": "https://vidlisync.com/privacy",
+  "terms_of_service_url": "https://vidlisync.com/terms",
+  "contact_information": {
+    "name": "VidLiSync Support",
+    "email": "support@vidlisync.com"
+  },
+  "features": {
+    "in_meeting": {
+      "audio_streaming": true,
+      "video_streaming": true,
+      "screen_sharing": false,
+      "breakout_room": false,
+      "waiting_room": false,
+      "cloud_recording": false,
+      "local_recording": false,
+      "chat": true,
+      "webinar": true,
+      "live_streaming": false
+    }
+  },
+  "scopes": [
+    "meeting:read",
+    "meeting:write",
+    "user:read",
+    "recording:read"
+  ],
+  "webhooks": {
+    "url": "https://vidlisync.com/zoom/webhooks",
+    "events": [
+      "meeting.started",
+      "meeting.ended",
+      "meeting.participant_joined",
+      "meeting.participant_left",
+      "recording.completed"
+    ]
+  }
+}

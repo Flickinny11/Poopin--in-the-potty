@@ -1,0 +1,80 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.4/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.4",
+  "id": "vidlisync-translator",
+  "version": "1.0.0",
+  "packageName": "com.vidlisync.translator",
+  "developer": {
+    "name": "VidLiSync",
+    "websiteUrl": "https://vidlisync.com",
+    "privacyUrl": "https://vidlisync.com/privacy",
+    "termsOfUseUrl": "https://vidlisync.com/terms"
+  },
+  "name": {
+    "short": "VidLiSync Translator",
+    "full": "VidLiSync Real-time Translation for Teams"
+  },
+  "description": {
+    "short": "Real-time translation with voice cloning and lip sync for Teams meetings",
+    "full": "VidLiSync provides real-time speech-to-speech translation during Microsoft Teams meetings. Preserve your unique voice characteristics while speaking any language with AI-powered voice cloning and lip synchronization."
+  },
+  "icons": {
+    "outline": "assets/outline.png",
+    "color": "assets/color.png"
+  },
+  "accentColor": "#3B82F6",
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "devicePermissions": [
+    "media"
+  ],
+  "validDomains": [
+    "vidlisync.com",
+    "*.vidlisync.com"
+  ],
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://vidlisync.com/teams/config",
+      "canUpdateConfiguration": true,
+      "scopes": [
+        "team",
+        "groupchat"
+      ],
+      "context": [
+        "meetingChatTab",
+        "meetingDetailsTab",
+        "meetingSidePanel"
+      ]
+    }
+  ],
+  "staticTabs": [
+    {
+      "entityId": "translation-dashboard",
+      "name": "Translation Dashboard",
+      "contentUrl": "https://vidlisync.com/teams/dashboard",
+      "websiteUrl": "https://vidlisync.com/dashboard",
+      "scopes": [
+        "personal"
+      ]
+    }
+  ],
+  "meetingExtensionDefinition": {
+    "scenes": [
+      {
+        "id": "translation-panel",
+        "name": "Live Translation",
+        "file": "scenes/translation.json",
+        "preview": "assets/preview.png",
+        "maxAudience": 50,
+        "seatsReservedForOrganizersOrPresenters": 0
+      }
+    ],
+    "supportsStreaming": true
+  },
+  "webApplicationInfo": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "resource": "https://vidlisync.com"
+  }
+}
