@@ -103,7 +103,7 @@ export default function ModelsPage() {
       {/* Features Overview */}
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          What's Included
+          What&apos;s Included
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
