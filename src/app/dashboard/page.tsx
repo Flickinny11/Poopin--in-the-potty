@@ -18,7 +18,8 @@ import {
   CalendarIcon,
   CreditCardIcon,
   ShieldCheckIcon,
-  PresentationIcon
+  PresentationIcon,
+  SmartphoneIcon
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -81,6 +82,13 @@ export default function DashboardPage() {
   ]
 
   const quickActions = [
+    {
+      title: 'VS Friends',
+      description: 'Tap phones together for instant multilingual conversations',
+      icon: SmartphoneIcon,
+      action: () => router.push('/vs-friends'),
+      color: 'bg-gradient-to-r from-blue-500 to-purple-600'
+    },
     {
       title: 'VS Presenter',
       description: 'Start a multi-language presentation with real-time translation',
@@ -157,6 +165,10 @@ export default function DashboardPage() {
             <a href="/dashboard" className="bg-blue-50 text-blue-700 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
               <VideoIcon className="mr-3 h-5 w-5" />
               Dashboard
+            </a>
+            <a href="/vs-friends" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
+              <SmartphoneIcon className="mr-3 h-5 w-5" />
+              VS Friends
             </a>
             <a href="/presenter" className="text-gray-700 hover:bg-gray-50 group flex items-center px-3 py-2 text-sm font-medium rounded-lg">
               <PresentationIcon className="mr-3 h-5 w-5" />
@@ -240,7 +252,7 @@ export default function DashboardPage() {
           {/* Quick Actions */}
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {quickActions.map((action, index) => (
                 <div key={index} className="card hover:shadow-lg cursor-pointer" onClick={action.action}>
                   <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center mb-4`}>
